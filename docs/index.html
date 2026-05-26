@@ -3,472 +3,260 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Scheduler - Macchi Plast</title>
-    <!-- Icone Lucide per una grafica moderna -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <title>Macchi Plast - Smart Planning Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#0b0e14',
+                        cardBg: '#151b23',
+                        borderColor: '#30363d',
+                        accentGreen: '#2ea44f',
+                        accentBlue: '#388bfd',
+                        accentOrange: '#f0883e',
+                        accentRed: '#f85149'
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        :root {
-            --bg-dark: #09090b;
-            --bg-panel: #14141b;
-            --bg-card: #1c1c24;
-            --bg-card-hover: #232331;
-            --border: #2e2e3f;
-            --text-main: #f4f4f5;
-            --text-muted: #a1a1aa;
-            --primary: #00d4ff;
-            --green: #10b981;
-            --yellow: #f59e0b;
-            --red: #ef4444;
-        }
-
         body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            margin: 0;
-            padding: 20px;
-            overflow-x: hidden;
+            font-family: 'Inter', sans-serif;
+            background-color: #0b0e14;
+            color: #f0f6fc;
+            -webkit-font-smoothing: antialiased;
         }
-
-        /* Layout Principale */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid var(--border);
-            padding-bottom: 15px;
-            margin-bottom: 20px;
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
         }
-
-        .header-title {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+        ::-webkit-scrollbar-track {
+            background: #0b0e14;
         }
-
-        .logo-box {
-            background: linear-gradient(135deg, var(--primary), #0088cc);
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 900;
-            color: #000;
+        ::-webkit-scrollbar-thumb {
+            background: #30363d;
+            border-radius: 4px;
         }
-
-        h1 {
-            font-size: 1.6rem;
-            margin: 0;
-            letter-spacing: -0.5px;
+        ::-webkit-scrollbar-thumb:hover {
+            background: #8b949e;
         }
-
-        /* Selettore Giorno */
-        .giorni-bar {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            overflow-x: auto;
-            padding-bottom: 5px;
-        }
-
-        .giorno-btn {
-            background-color: var(--bg-panel);
-            color: var(--text-muted);
-            border: 1px solid var(--border);
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s ease;
-            white-space: nowrap;
-        }
-
-        .giorno-btn:hover {
-            border-color: var(--primary);
-            color: #fff;
-        }
-
-        .giorno-btn.active {
-            background-color: var(--primary);
-            color: #000;
-            border-color: var(--primary);
-        }
-
-        /* Griglia Gantt / Tabellone */
-        .gantt-container {
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            overflow: hidden;
-            background-color: var(--bg-panel);
-        }
-
-        .gantt-table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-            min-width: 1000px;
-        }
-
-        .gantt-table th, .gantt-table td {
-            border: 1px solid var(--border);
-            padding: 14px;
-            vertical-align: top;
-        }
-
-        .gantt-table th {
-            background-color: #0e0e14;
-            color: var(--text-muted);
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 700;
-        }
-
-        /* Righe Presse */
-        .pressa-info {
-            background-color: #0e0e14;
-            font-weight: bold;
-            font-size: 1.1rem;
-        }
-
-        .pressa-sub {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            font-weight: normal;
-            margin-top: 4px;
-        }
-
-        /* Celle Turni */
-        .turno-cella {
-            position: relative;
-            min-height: 160px;
-            height: 100%;
-        }
-
-        .stato-libero {
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #43435c;
-            font-style: italic;
-            font-size: 0.85rem;
-            border: 1.5px dashed #242435;
-            border-radius: 8px;
-            padding: 20px;
-            background: rgba(255,255,255,0.01);
-        }
-
-        /* Card Ordine Attivo */
-        .card-attiva {
-            background-color: var(--bg-card);
-            border-left: 4px solid var(--primary);
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-
-        .card-attiva:hover {
-            background-color: var(--bg-card-hover);
-            transform: translateY(-2px);
-        }
-
-        .card-attiva.completato {
-            opacity: 0.35;
-            filter: grayscale(1);
-            border-left-color: var(--text-muted);
-        }
-
-        .card-head {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-
-        .ordine-id {
-            font-weight: bold;
-            font-size: 1rem;
-            color: #fff;
-        }
-
-        .badge-articolo {
-            background: rgba(0, 212, 255, 0.1);
-            color: var(--primary);
-            border: 1px solid rgba(0, 212, 255, 0.2);
-            padding: 3px 8px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: bold;
-        }
-
-        .produzione-info {
-            font-size: 0.85rem;
-            margin-bottom: 12px;
-            border-bottom: 1px solid #28283a;
-            padding-bottom: 10px;
-        }
-
-        .info-riga {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-        }
-
-        .info-riga .label { color: var(--text-muted); }
-        .info-riga .value { color: #fff; font-weight: 600; }
-
-        /* Lista Task */
-        .task-list {
-            margin-bottom: 15px;
-        }
-
-        .task-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            font-size: 0.8rem;
-            margin-bottom: 6px;
-            cursor: pointer;
-        }
-
-        .task-item input[type="checkbox"] {
-            margin-top: 2px;
-            width: 15px;
-            height: 15px;
-            accent-color: var(--primary);
-            cursor: pointer;
-            flex-shrink: 0;
-        }
-
-        .task-text {
-            color: var(--text-main);
-        }
-
-        .task-item input[type="checkbox"]:checked + .task-text {
-            color: var(--text-muted);
-            text-decoration: line-through;
-        }
-
-        /* Chiusura Turno */
-        .chiusura-box {
-            background: rgba(0, 212, 255, 0.03);
-            border: 1px dashed rgba(0, 212, 255, 0.2);
-            padding: 10px;
-            border-radius: 6px;
-        }
-
-        .chiusura-lbl {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: bold;
-            color: var(--primary);
-            cursor: pointer;
-            font-size: 0.8rem;
-        }
-
-        .chiusura-lbl input {
-            accent-color: var(--primary);
-            width: 16px;
-            height: 16px;
-        }
-
-        /* Sidebar Dettagli */
-        .sidebar {
-            position: fixed;
-            right: -420px;
-            top: 0;
-            width: 380px;
-            height: 100vh;
-            background-color: #111116;
-            border-left: 1px solid var(--border);
-            box-shadow: -10px 0 30px rgba(0,0,0,0.6);
-            padding: 25px;
-            box-sizing: border-box;
-            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 1000;
-            overflow-y: auto;
-        }
-
-        .sidebar.open {
-            right: 0;
-        }
-
-        .sidebar-head {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 15px;
-            margin-bottom: 20px;
-        }
-
-        .sidebar-close {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            font-size: 1.5rem;
-        }
-
-        .sidebar-close:hover { color: #fff; }
-
-        .parametro-gruppo {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
-
-        .parametro-title {
-            color: var(--primary);
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-
-        .parametro-val {
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-
-        /* Overlay */
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0,0,0,0.5);
-            display: none;
-            z-index: 999;
-        }
-
-        .overlay.active {
-            display: block;
-        }
-
-        /* Modal Sblocco PIN */
-        .modal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0.9);
-            background: #15151f;
-            border: 1px solid var(--border);
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            z-index: 1001;
-            display: none;
-            text-align: center;
-            width: 320px;
-        }
-
-        .modal.active {
-            display: block;
-            transform: translate(-50%, -50%) scale(1);
-            transition: transform 0.2s ease-out;
-        }
-
-        .pin-input {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            color: #fff;
-            font-size: 2rem;
-            text-align: center;
-            letter-spacing: 8px;
-            padding: 10px;
-            width: 100%;
-            box-sizing: border-box;
-            border-radius: 8px;
-            margin: 20px 0;
-        }
-
-        .modal-btn {
-            background-color: var(--primary);
-            color: #000;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-        }
-
-        .modal-btn.cancel {
-            background: none;
-            color: var(--text-muted);
-            margin-top: 10px;
+        .job-transition {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
     </style>
 </head>
-<body>
+<body class="p-4 md:p-6 min-h-screen flex flex-col justify-between">
 
-    <header>
-        <div class="header-title">
-            <div class="logo-box">M</div>
-            <h1>Macchi Plast &ndash; Smart Gantt Plan</h1>
+    <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-borderColor pb-6 mb-6">
+        <div>
+            <div class="flex items-center gap-3">
+                <span class="w-3 h-3 rounded-full bg-accentGreen animate-pulse shadow-[0_0_10px_#2ea44f]"></span>
+                <h1 class="text-xl md:text-2xl font-bold tracking-tight">MACCHI PLAST — Smart Planning</h1>
+            </div>
+            <p class="text-xs text-gray-400 mt-1">Algoritmo predittivo Earliest Completion Time (ECT) con gestione 24/5 e spurghi colore</p>
         </div>
-        <div class="status-badge">
-            <i data-lucide="radio" style="color: var(--green); width: 18px; height: 18px;"></i>
-            <span style="font-weight: 600; font-size: 0.85rem; margin-left: 8px;">Tablet Monitor Attivo</span>
+        <div class="flex flex-wrap gap-3 items-center w-full md:w-auto">
+            <div class="bg-cardBg border border-borderColor p-1 rounded-md flex items-center gap-1 w-full sm:w-auto">
+                <button id="btn-role-officina" onclick="cambiaRuolo('officina')" class="flex-1 sm:flex-none px-3 py-1.5 rounded text-xs font-semibold transition-all flex items-center justify-center gap-1.5 bg-accentGreen/15 text-accentGreen">
+                    📱 Officina
+                </button>
+                <button id="btn-role-pm" onclick="tentativoPM()" class="flex-1 sm:flex-none px-3 py-1.5 rounded text-xs font-semibold transition-all flex items-center justify-center gap-1.5 text-gray-400 hover:text-white">
+                    💼 PM Mode
+                </button>
+            </div>
+            <button id="btn-nuovo-ordine" onclick="apriModalAggiungi()" class="hidden w-full sm:w-auto px-4 py-2 bg-accentBlue hover:bg-opacity-90 text-white font-semibold text-xs rounded-md shadow-md transition-all flex items-center justify-center gap-2">
+                ➕ Nuovo Ordine
+            </button>
+            <button id="btn-reset-conf" onclick="apriConfermaReset()" class="hidden w-full sm:w-auto px-4 py-2 border border-borderColor hover:bg-white/5 text-gray-300 font-semibold text-xs rounded-md transition-all">
+                🔄 Reset Configurazione
+            </button>
+            <div class="text-xs text-gray-400 bg-cardBg border border-borderColor px-3 py-2 rounded-md w-full sm:w-auto text-center">
+                Stato: <span id="label-role-status" class="text-accentGreen font-bold">ONLINE (Tablet Officina)</span>
+            </div>
         </div>
     </header>
 
-    <!-- Navigazione Giorni -->
-    <div class="giorni-bar">
-        <button class="giorno-btn active" onclick="cambiaGiorno('Lunedì')">Lunedì</button>
-        <button class="giorno-btn" onclick="cambiaGiorno('Martedì')">Martedì</button>
-        <button class="giorno-btn" onclick="cambiaGiorno('Mercoledì')">Mercoledì</button>
-        <button class="giorno-btn" onclick="cambiaGiorno('Giovedì')">Giovedì</button>
-        <button class="giorno-btn" onclick="cambiaGiorno('Venerdì')">Venerdì</button>
-        <button class="giorno-btn" onclick="cambiaGiorno('Sabato')">Sabato</button>
-    </div>
-
-    <!-- Tabellone Gantt a Matrice -->
-    <div class="gantt-container">
-        <table class="gantt-table">
-            <thead>
-                <tr>
-                    <th style="width: 13%;">Pressa</th>
-                    <th style="width: 29%;">T1 &ndash; Mattina (06:00 - 14:00)</th>
-                    <th style="width: 29%;">T2 &ndash; Pomeriggio (14:00 - 22:00)</th>
-                    <th style="width: 29%;">T3 &ndash; Notte (22:00 - 06:00)</th>
-                </tr>
-            </thead>
-            <tbody id="ganttBody">
-                <!-- Generato Dinamicamente -->
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Sidebar Dettagli Stampo -->
-    <div class="overlay" id="overlay" onclick="chiudiSidebar()"></div>
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-head">
-            <h2 id="sideTitle" style="margin: 0; font-size: 1.3rem;">Dettagli Attrezzaggio</h2>
-            <button class="sidebar-close" onclick="chiudiSidebar()">&times;</button>
+    <section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-cardBg border border-borderColor p-4 rounded-lg">
+            <div class="text-xs text-gray-400 font-medium uppercase">Presse Produttive</div>
+            <div id="kpi-presse" class="text-xl md:text-2xl font-bold text-white mt-1">11 / 11</div>
+            <div class="text-[10px] text-gray-500 mt-1">Configurate nell'officina</div>
         </div>
-        <div id="sidebarContent"></div>
+        <div class="bg-cardBg border border-borderColor p-4 rounded-lg">
+            <div class="text-xs text-gray-400 font-medium uppercase">Cambi Stampo Evitati</div>
+            <div id="kpi-evitati" class="text-xl md:text-2xl font-bold text-accentGreen mt-1">0</div>
+            <div class="text-[10px] text-gray-500 mt-1">Grazie ad accoppiamenti intelligenti</div>
+        </div>
+        <div class="bg-cardBg border border-borderColor p-4 rounded-lg">
+            <div class="text-xs text-gray-400 font-medium uppercase">Ore di Attrezzaggio Salve</div>
+            <div id="kpi-ore-salvate" class="text-xl md:text-2xl font-bold text-accentBlue mt-1">0 h</div>
+            <div class="text-[10px] text-gray-500 mt-1">Nessun cambio stampo/spurgo</div>
+        </div>
+        <div class="bg-cardBg border border-borderColor p-4 rounded-lg">
+            <div class="text-xs text-gray-400 font-medium uppercase">Ordini in Coda</div>
+            <div id="kpi-coda" class="text-xl md:text-2xl font-bold text-accentOrange mt-1">0</div>
+            <div class="text-[10px] text-gray-500 mt-1">In attesa di allocazione</div>
+        </div>
+    </section>
+
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start flex-grow">
+        
+        <main class="bg-cardBg border border-borderColor rounded-lg overflow-hidden shadow-2xl">
+            <div class="grid grid-cols-[200px_1fr] border-b border-borderColor bg-[#161b22]">
+                <div class="p-4 text-xs font-semibold uppercase text-gray-400 border-r border-borderColor flex items-center">
+                    Presse & Modelli
+                </div>
+                <div class="overflow-x-auto flex select-none text-xs font-semibold text-center py-2" id="calendar-header-scroll" style="scrollbar-width: none;">
+                    <div class="flex min-w-[1440px]"></div>
+                </div>
+            </div>
+            <div id="planning-rows" class="divide-y divide-borderColor"></div>
+        </main>
+
+        <aside class="bg-cardBg border border-borderColor rounded-lg p-5 sticky top-6 shadow-2xl flex flex-col gap-4 self-start">
+            <div class="bg-darkBg/60 border border-borderColor/50 p-3 rounded-lg flex flex-col gap-2">
+                <div class="flex justify-between items-center text-[10px] text-gray-400 uppercase font-bold tracking-wider">
+                    <span>🎛️ Simulatore Tempo Officina</span>
+                    <span class="text-accentBlue animate-pulse">In esecuzione</span>
+                </div>
+                <div id="current-simulated-time" class="text-sm font-semibold text-white">
+                    Lunedì 25/05/2026 - 17:13
+                </div>
+                <div class="grid grid-cols-2 gap-2 mt-1">
+                    <button onclick="avanzaTempo(1)" class="py-1 px-2 bg-white/5 hover:bg-white/10 text-[10px] font-semibold text-gray-300 rounded border border-borderColor transition-all">
+                        ➕ Avanza 1 Ora
+                    </button>
+                    <button onclick="avanzaTempo(8)" class="py-1 px-2 bg-accentBlue/20 hover:bg-accentBlue/30 text-[10px] font-semibold text-accentBlue rounded border border-accentBlue/30 transition-all">
+                        ⏩ Avanza 1 Turno
+                    </button>
+                </div>
+            </div>
+
+            <div class="border-b border-borderColor pb-3">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-accentOrange animate-ping"></span>
+                        <h2 id="active-shift-title" class="text-base font-bold text-white uppercase tracking-wider">Turno Attivo</h2>
+                    </div>
+                    <span id="active-shift-hours" class="text-xs bg-white/10 text-gray-300 font-semibold px-2 py-0.5 rounded-full">--:--</span>
+                </div>
+                <p class="text-[11px] text-gray-400 mt-1">Cambi stampo e attrezzaggi per il turno corrente.</p>
+            </div>
+
+            <div class="flex-grow max-h-[420px] overflow-y-auto pr-1">
+                <div id="shift-tasks-container" class="space-y-3"></div>
+            </div>
+
+            <div id="pm-sync-box" class="hidden bg-darkBg/80 border border-accentBlue/30 p-3 rounded-lg flex flex-col gap-2 mt-2">
+                <div class="text-[10px] text-accentBlue uppercase font-bold tracking-wider flex justify-between items-center">
+                    <span>🔄 Sincronizzazione Officina</span>
+                    <span class="w-2 h-2 rounded-full bg-accentBlue animate-pulse"></span>
+                </div>
+                <p class="text-[11px] text-gray-400 leading-tight">Ordini finiti sul tablet da archiviare o cancellare su Notion/CSV:</p>
+                <div id="pm-completed-list" class="text-xs font-mono text-gray-300 max-h-24 overflow-y-auto bg-black/40 p-2 rounded border border-borderColor divide-y divide-borderColor/30">
+                    Nessun ordine completato
+                </div>
+                <button onclick="copiaCodiciCompletati()" class="w-full py-1.5 bg-accentBlue/20 hover:bg-accentBlue/30 border border-accentBlue/50 text-white rounded text-[10px] font-semibold transition-all">
+                    📋 Copia codici finiti negli appunti
+                </button>
+            </div>
+
+            <div class="border-t border-borderColor pt-3 text-center">
+                <p class="text-[10px] text-gray-500 italic">Prepara lo stampo e il materiale indicato prima dell'orario di attrezzaggio.</p>
+            </div>
+        </aside>
+
     </div>
 
-    <!-- Modal per PIN Chiusura -->
-    <div class="modal" id="pinModal">
-        <h3 style="margin: 0;">Sblocco Capoturno</h3>
-        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">Inserisci il codice PIN per confermare la chiusura.</p>
-        <input type="password" maxlength="4" class="pin-input" id="pinField" placeholder="••••">
-        <button class="modal-btn" onclick="validaPin()">Conferma</button>
-        <button class="modal-btn cancel" onclick="chiudiPinModal()">Annulla</button>
+    <div id="modal-sicurezza" class="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-cardBg border border-borderColor w-full max-w-xs rounded-lg overflow-hidden shadow-2xl p-6">
+            <div class="text-center mb-4">
+                <span class="text-2xl">🔒</span>
+                <h3 class="text-sm font-bold uppercase tracking-wider text-white mt-2">Area Riservata PM</h3>
+                <p class="text-[11px] text-gray-400 mt-1">Inserisci il PIN per abilitare le modifiche</p>
+            </div>
+            <div class="bg-darkBg border border-borderColor p-3 rounded text-center text-lg font-mono tracking-[0.75em] text-accentBlue font-bold mb-4 h-12 flex items-center justify-center" id="pin-display">
+                ----
+            </div>
+            <div class="grid grid-cols-3 gap-2 mb-4">
+                <button onclick="digitaPin('1')" class="py-2 bg-white/5 hover:bg-white/10 active:bg-white/20 text-white rounded font-bold text-sm">1</button>
+                <button onclick="digitaPin('2')" class="py-2 bg-white/5 hover:bg-white/10 active:bg-white/20 text-white rounded font-bold text-sm">2</button>
+                <button onclick="digitaPin('3')" class="py-2 bg-white/5 hover:bg-white/10 active:bg-white/20 text-white rounded font-bold text-sm">3</button>
+                <button onclick="digitaPin('4')" class="py-2 bg-white/5 hover:bg-white/10 active:bg-white/20 text-white rounded font-bold text-sm">4</button>
+                <button onclick="digitaPin('5')" class="py-2 bg-white/5 hover:bg-white/10 active:bg-white/20 text-white rounded font-bold text-sm">5</button>
+                <button onclick="digitaPin('6')" class="py-2 bg-white/5 hover:bg-white/10 active:bg-white/20 text-white rounded font-bold text-sm">6</button>
+                <button onclick="digitaPin('7')" class="py-2 bg-white/5 hover:bg-white/10 active:bg-white/20 text-white rounded font-bold text-sm">7</button>
+                <button onclick="digitaPin('8')" class="py-2 bg-white/5 hover:bg-white/10 active:bg-white/20 text-white rounded font-bold text-sm">8</button>
+                <button onclick="digitaPin('9')" class="py-2 bg-white/5 hover:bg-white/10 active:bg-white/20 text-white rounded font-bold text-sm">9</button>
+                <button onclick="cancellaPin()" class="py-2 bg-accentRed/10 hover:bg-accentRed/20 text-accentRed rounded text-[10px] font-bold">CANC</button>
+                <button onclick="digitaPin('0')" class="py-2 bg-white/5 hover:bg-white/10 active:bg-white/20 text-white rounded font-bold text-sm">0</button>
+                <button onclick="confermaPin()" class="py-2 bg-accentGreen/20 hover:bg-accentGreen/30 text-accentGreen rounded text-[10px] font-bold">INVIO</button>
+            </div>
+            <p class="text-[10px] text-gray-500 text-center italic">PIN di sblocco demo: <strong class="text-gray-400 font-mono">1234</strong></p>
+            <button onclick="chiudiSicurezza()" class="w-full mt-2 py-1.5 border border-borderColor text-gray-400 hover:text-white text-[10px] font-semibold rounded">Annulla</button>
+        </div>
     </div>
+
+    <div id="modal-conferma" class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-cardBg border border-borderColor w-full max-w-sm rounded-lg overflow-hidden shadow-2xl">
+            <div class="p-5 border-b border-borderColor">
+                <h3 class="text-sm font-bold uppercase tracking-wider text-accentRed flex items-center gap-2">
+                    ⚠️ CONFERMA OPERAZIONE
+                </h3>
+            </div>
+            <div class="p-5 text-sm text-gray-300" id="testo-conferma">Confermi l'operazione?</div>
+            <div class="p-5 border-t border-borderColor flex gap-3">
+                <button onclick="chiudiConferma()" class="flex-1 py-2 border border-borderColor text-gray-400 text-xs font-semibold rounded hover:bg-white/5 transition-all">Annulla</button>
+                <button id="btn-conferma-esegui" onclick="eseguiAzioneConfermata()" class="flex-1 py-2 bg-accentGreen text-white text-xs font-semibold rounded hover:bg-opacity-90 transition-all">Conferma</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-aggiungi" class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-cardBg border border-borderColor w-full max-w-md rounded-lg overflow-hidden shadow-2xl">
+            <div class="p-5 border-b border-borderColor flex justify-between items-center">
+                <h3 class="text-sm font-bold uppercase tracking-wider text-white">Nuovo Ordine di Lavoro</h3>
+                <button onclick="chiudiModalAggiungi()" class="text-gray-400 hover:text-white">&times;</button>
+            </div>
+            <form id="form-ordine" class="p-5 space-y-4" onsubmit="salvaNuovoOrdine(event)">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 mb-1">Codice Articolo</label>
+                    <input type="text" id="input-articolo" list="articoli-list" placeholder="Scrivi codice (es. ART-022) o cerca..." autocomplete="off" class="w-full bg-darkBg border border-borderColor rounded p-2 text-sm text-white focus:outline-none focus:border-accentBlue" oninput="aggiornaAnteprimaArticolo()">
+                    <datalist id="articoli-list"></datalist>
+                    <p id="anteprime-tecniche" class="text-[11px] text-gray-500 mt-1 italic"></p>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 mb-1">Quantità Richiesta (Pezzi)</label>
+                    <input type="number" id="input-qta" value="5000" min="100" class="w-full bg-darkBg border border-borderColor rounded p-2 text-sm text-white focus:outline-none focus:border-accentBlue" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 mb-1">Data Scadenza Consegna</label>
+                    <input type="date" id="input-scadenza" class="w-full bg-darkBg border border-borderColor rounded p-2 text-sm text-white focus:outline-none focus:border-accentBlue" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 mb-1">Priorità Commessa</label>
+                    <div class="flex gap-4">
+                        <label class="flex items-center gap-2 text-sm cursor-pointer">
+                            <input type="radio" name="priorita" value="Normale" checked class="accent-accentBlue"> Normale
+                        </label>
+                        <label class="flex items-center gap-2 text-sm text-accentRed cursor-pointer">
+                            <input type="radio" name="priorita" value="Alta" class="accent-accentRed"> Alta (Urgentissima)
+                        </label>
+                    </div>
+                </div>
+                <div class="pt-2 flex gap-3">
+                    <button type="button" onclick="chiudiModalAggiungi()" class="flex-1 py-2 border border-borderColor text-gray-400 text-xs font-semibold rounded hover:bg-white/5 transition-all">Annulla</button>
+                    <button type="submit" class="flex-1 py-2 bg-accentGreen text-white text-xs font-semibold rounded hover:bg-opacity-90 transition-all">Pianifica Lavoro</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed bottom-4 right-4 bg-accentBlue text-white text-xs font-semibold py-3 px-5 rounded-lg shadow-2xl transition-all duration-300 transform translate-y-20 opacity-0 z-50"></div>
 
     <script>
         // DATA_START
@@ -476,89 +264,771 @@
         const PRESSE_SORGENTE = [];
         const ORDINI_SORGENTE = [];
         // DATA_END
+    </script>
 
-        let giornoSelezionato = "Lunedì";
-        let targetOrdineChiusura = null;
-        let targetCheckboxChiusura = null;
+    <script>
+        let dataSimulata = new Date(2026, 4, 25, 17, 13, 0);
+        let ruoloAttivo = "officina";
+        let pinCorrente = "";
+        const PIN_CORRETTO = "1234";
 
-        function cambiaGiorno(giorno) {
-            giornoSelezionato = giorno;
-            document.querySelectorAll('.giorno-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.innerText === giorno);
-            });
-            costruisciTabellone();
+        let articoli = [];
+        let presse = [];
+        let ordini = [];
+        let ordiniCompletati = [];
+        let azioneInCorso = null;
+
+        function getGradoColore(colore) {
+            const c = (colore || "").toLowerCase();
+            if (c.includes("trasparente") || c.includes("naturale") || c.includes("bianco") || c.includes("giallo")) return 1;
+            if (c.includes("nero") || c.includes("marrone")) return 3;
+            return 2;
         }
 
-        function costruisciTabellone() {
-            const tbody = document.getElementById('ganttBody');
-            tbody.innerHTML = "";
+        function aggiungiOreLavorative(dataPartenza, ore) {
+            let corrente = new Date(dataPartenza.getTime());
+            let minutiRimanenti = Math.round(ore * 60);
 
-            if (PRESSE_SORGENTE.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 40px;">
-                    Nessun dato importato nei CSV o scheduler.py non ancora eseguito.
-                </td></tr>`;
+            while (minutiRimanenti > 0) {
+                corrente.setTime(corrente.getTime() + 60000);
+                let wd = corrente.getDay();
+                let ora = corrente.getHours();
+
+                let isWeekend = false;
+                if (wd === 5 && ora >= 22) isWeekend = true;
+                else if (wd === 6 || wd === 0) isWeekend = true;
+                else if (wd === 1 && ora < 6) isWeekend = true;
+
+                if (isWeekend) {
+                    let giorniDaAggiungere = (1 - wd + 7) % 7;
+                    if (giorniDaAggiungere === 0 && (wd === 1 && ora < 6)) {
+                        corrente.setHours(6, 0, 0, 0);
+                    } else {
+                        if (giorniDaAggiungere === 0) giorniDaAggiungere = 7;
+                        corrente.setDate(corrente.getDate() + giorniDaAggiungere);
+                        corrente.setHours(6, 0, 0, 0);
+                    }
+                } else {
+                    minutiRimanenti--;
+                }
+            }
+            return corrente;
+        }
+
+        function calcolaTempoAttrezzaggio(artPrec, artSucc) {
+            if (!artPrec) return 2.0;
+            if (artPrec.stampo === artSucc.stampo && artPrec.materiale === artSucc.materiale && artPrec.colore === artSucc.colore) {
+                return 0.0;
+            }
+            if (artPrec.materiale !== artSucc.materiale) return 3.5;
+
+            const gradoPrec = getGradoColore(artPrec.colore);
+            const gradoSucc = getGradoColore(artSucc.colore);
+
+            if (gradoPrec < gradoSucc) return 1.0;
+            if (gradoPrec > gradoSucc) return 5.0;
+            return 2.5;
+        }
+
+        function popolaFiltroArticoli() {
+            const list = document.getElementById('articoli-list');
+            if (list) {
+                list.innerHTML = '';
+                articoli.forEach(art => {
+                    const opt = document.createElement('option');
+                    opt.value = art.id;
+                    opt.textContent = `${art.descrizione} (${art.materiale} - ${art.colore})`;
+                    list.appendChild(opt);
+                });
+            }
+        }
+
+        function aggiornaAnteprimaArticolo() {
+            const inputVal = document.getElementById('input-articolo').value.trim().toUpperCase();
+            const art = articoli.find(a => a.id === inputVal);
+            const anteprima = document.getElementById('anteprime-tecniche');
+            
+            if (art) {
+                let stringaVincolo = art.pressaVincolata ? ` | <span class="text-accentBlue font-bold">🔒 Vincolato a: ${art.pressaVincolata}</span>` : "";
+                let gradoCol = getGradoColore(art.colore);
+                let descGrado = gradoCol === 1 ? "Chiaro ⚪" : (gradoCol === 3 ? "Scuro ⚫" : "Medio 🔵");
+                anteprima.innerHTML = `<span class="text-accentGreen font-semibold">✓ Trovato:</span> ${art.descrizione} (Stampo: ${art.stampo} | Colore: ${art.colore} [${descGrado}]${stringaVincolo})`;
+            } else if (inputVal.length > 0) {
+                anteprima.innerHTML = `<span class="text-accentRed font-semibold">⚠ Articolo non registrato.</span> Inserisci un codice valido (es. ART-001)`;
+            } else {
+                anteprima.textContent = '';
+            }
+        }
+
+        function inizializzaDati() {
+            // Se le sorgenti da Python sono popolate, le usiamo come base
+            articoli = ARTICOLI_SORGENTE.length > 0 ? ARTICOLI_SORGENTE.map(a => ({
+                id: a.ID_Articolo, descrizione: a.Descrizione, stampo: a.Codice_Stampo,
+                impronte: parseInt(a.Impronte), tempoCiclo: parseInt(a.Tempo_Ciclo),
+                materiale: a.Materiale, colore: a.Colore, tonMin: parseInt(a.Tonnellaggio_Min),
+                scaffale: a.Ubicazione || "Magazzino", temp: a.Temp || "200°C", deum: a.Deum || "No",
+                pressaVincolata: a.Pressa_Vincolata || ""
+            })) : [
+                { id: "ART-001", descrizione: "Scatola PP Nera", stampo: "ST-001", impronte: 2, tempoCiclo: 25, materiale: "PP", colore: "Nero", tonMin: 100, scaffale: "Scaffale A-04", temp: "200°C", deum: "No", pressaVincolata: "" },
+                { id: "ART-022", descrizione: "Coperchio ABS Grigio", stampo: "ST-022", impronte: 1, tempoCiclo: 30, materiale: "ABS", colore: "Grigio", tonMin: 150, scaffale: "Scaffale B-12", temp: "230°C", deum: "Sì, 2h a 80°C", pressaVincolata: "P05" },
+                { id: "ART-045", descrizione: "Connettore PA6 Naturale", stampo: "ST-045", impronte: 4, tempoCiclo: 20, materiale: "PA6", colore: "Naturale", tonMin: 50, scaffale: "Scaffale C-01", temp: "260°C", deum: "Sì, 4h a 90°C", pressaVincolata: "" }
+            ];
+
+            presse = PRESSE_SORGENTE.length > 0 ? PRESSE_SORGENTE.map(p => ({
+                id: p.ID_Pressa, modello: p.Modello, tonnellaggio: parseInt(p.Tonnellaggio), stato: p.Stato
+            })) : [
+                { id: "P01", modello: "Arburg 50t", tonnellaggio: 50, stato: "Attiva" },
+                { id: "P02", modello: "Negri Bossi 100t", tonnellaggio: 100, stato: "Attiva" },
+                { id: "P03", modello: "Engel 100t", tonnellaggio: 100, stato: "Attiva" },
+                { id: "P04", modello: "BMB 150t", tonnellaggio: 150, stato: "Attiva" },
+                { id: "P05", modello: "Negri Bossi 150t", tonnellaggio: 150, stato: "Attiva" },
+                { id: "P06", modello: "Engel 180t", tonnellaggio: 180, stato: "Attiva" },
+                { id: "P07", modello: "Arburg 200t", tonnellaggio: 200, stato: "Attiva" },
+                { id: "P08", modello: "BMB 250t", tonnellaggio: 250, stato: "Attiva" },
+                { id: "P09", modello: "Krauss Maffei 300t", tonnellaggio: 300, stato: "Attiva" },
+                { id: "P10", modello: "Negri Bossi 350t", tonnellaggio: 350, stato: "Attiva" },
+                { id: "P11", modello: "Engel 400t", tonnellaggio: 400, stato: "Attiva" }
+            ];
+
+            ordini = ORDINI_SORGENTE.length > 0 ? ORDINI_SORGENTE.map(o => ({
+                id: o.ID_Ordine, articolo: o.Articolo, qta: parseInt(o.Quantita_Richiesta), scadenza: o.Data_Scadenza, priorita: o.Priorita
+            })) : [
+                { id: "ORD-2026-001", articolo: "ART-022", qta: 950, scadenza: "2026-05-29", priorita: "Alta" },
+                { id: "ORD-2026-002", articolo: "ART-001", qta: 5000, scadenza: "2026-05-30", priorita: "Normale" },
+                { id: "ORD-2026-003", articolo: "ART-045", qta: 6000, scadenza: "2026-05-28", priorita: "Alta" }
+            ];
+
+            const cacheOrdini = localStorage.getItem('mp_ordini');
+            const cacheCompletati = localStorage.getItem('mp_completati');
+            const cachePresse = localStorage.getItem('mp_presse');
+            const cacheRuolo = localStorage.getItem('mp_ruolo');
+
+            if (cacheOrdini) ordini = JSON.parse(cacheOrdini);
+            if (cacheCompletati) ordiniCompletati = JSON.parse(cacheCompletati);
+            if (cachePresse) presse = JSON.parse(cachePresse);
+            if (cacheRuolo) ruoloAttivo = cacheRuolo;
+
+            popolaFiltroArticoli();
+            disegnaIntestazioneCalendario();
+            eseguiSmartPlanning();
+            applicaInterfacciaRuolo();
+        }
+
+        function tentativoPM() {
+            if (ruoloAttivo === "pm") return;
+            pinCorrente = "";
+            aggiornaPinDisplay();
+            document.getElementById('modal-sicurezza').classList.remove('hidden');
+        }
+
+        function chiudiSicurezza() {
+            document.getElementById('modal-sicurezza').classList.add('hidden');
+            pinCorrente = "";
+        }
+
+        function digitaPin(num) {
+            if (pinCorrente.length < 4) {
+                pinCorrente += num;
+                aggiornaPinDisplay();
+            }
+            if (pinCorrente.length === 4) {
+                setTimeout(confermaPin, 200);
+            }
+        }
+
+        function cancellaPin() {
+            pinCorrente = pinCorrente.slice(0, -1);
+            aggiornaPinDisplay();
+        }
+
+        function aggiornaPinDisplay() {
+            const display = document.getElementById('pin-display');
+            display.textContent = pinCorrente.padEnd(4, '-');
+        }
+
+        function confermaPin() {
+            if (pinCorrente === PIN_CORRETTO) {
+                chiudiSicurezza();
+                cambiaRuolo("pm");
+            } else {
+                showToast("❌ PIN di sicurezza non corretto!");
+                pinCorrente = "";
+                aggiornaPinDisplay();
+            }
+        }
+
+        function cambiaRuolo(ruolo) {
+            ruoloAttivo = ruolo;
+            localStorage.setItem('mp_ruolo', ruolo);
+            applicaInterfacciaRuolo();
+            showToast(`Ruolo modificato: ${ruolo === 'pm' ? '💼 Production Manager' : '📱 Operatore Officina'}`);
+        }
+
+        function applicaInterfacciaRuolo() {
+            const btnOfficina = document.getElementById('btn-role-officina');
+            const btnPm = document.getElementById('btn-role-pm');
+            const btnNuovo = document.getElementById('btn-nuovo-ordine');
+            const btnReset = document.getElementById('btn-reset-conf');
+            const labelStatus = document.getElementById('label-role-status');
+            const pmSyncBox = document.getElementById('pm-sync-box');
+
+            if (ruoloAttivo === "pm") {
+                btnPm.className = "flex-1 sm:flex-none px-3 py-1.5 rounded text-xs font-semibold transition-all flex items-center justify-center gap-1.5 bg-accentBlue/15 text-accentBlue";
+                btnOfficina.className = "flex-1 sm:flex-none px-3 py-1.5 rounded text-xs font-semibold transition-all flex items-center justify-center gap-1.5 text-gray-400 hover:text-white";
+                btnNuovo.classList.remove('hidden');
+                btnReset.classList.remove('hidden');
+                if (pmSyncBox) pmSyncBox.classList.remove('hidden');
+                labelStatus.textContent = "ONLINE (Pianificazione PM)";
+                labelStatus.className = "text-accentBlue font-bold";
+            } else {
+                btnOfficina.className = "flex-1 sm:flex-none px-3 py-1.5 rounded text-xs font-semibold transition-all flex items-center justify-center gap-1.5 bg-accentGreen/15 text-accentGreen";
+                btnPm.className = "flex-1 sm:flex-none px-3 py-1.5 rounded text-xs font-semibold transition-all flex items-center justify-center gap-1.5 text-gray-400 hover:text-white";
+                btnNuovo.classList.add('hidden');
+                btnReset.classList.add('hidden');
+                if (pmSyncBox) pmSyncBox.classList.add('hidden');
+                labelStatus.textContent = "ONLINE (Tablet Officina)";
+                labelStatus.className = "text-accentGreen font-bold";
+            }
+            eseguiSmartPlanning();
+            aggiornaListaSyncPM();
+        }
+
+        function aggiornaListaSyncPM() {
+            const listContainer = document.getElementById('pm-completed-list');
+            if (!listContainer) return;
+            
+            if (ordiniCompletati.length === 0) {
+                listContainer.innerHTML = `<div class="text-gray-500 italic p-1 text-[11px]">Nessun ordine finito</div>`;
+                return;
+            }
+            
+            listContainer.innerHTML = ordiniCompletati.map(id => `
+                <div class="py-1 flex justify-between items-center text-[11px]">
+                    <span class="text-accentGreen font-bold">${id}</span>
+                    <span class="text-[10px] text-gray-500">Pronto per archivio</span>
+                </div>
+            `).join('');
+        }
+
+        function copiaCodiciCompletati() {
+            if (ordiniCompletati.length === 0) {
+                showToast("❌ Nessun codice da copiare!");
+                return;
+            }
+            const testoSinc = ordiniCompletati.join(', ');
+            
+            const tempInput = document.createElement("input");
+            tempInput.value = testoSinc;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
+            
+            showToast("📋 Codici copiati negli appunti!");
+        }
+
+        function disegnaIntestazioneCalendario() {
+            const scrollContainer = document.getElementById('calendar-header-scroll').firstElementChild;
+            scrollContainer.innerHTML = '';
+
+            const giorni = ["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì"];
+            const dataBaseCalendario = new Date(2026, 4, 25, 6, 0, 0);
+
+            giorni.forEach((g) => {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = "flex-1 border-r border-borderColor last:border-0";
+                dayDiv.innerHTML = `
+                    <div class="py-1 bg-white/5 border-b border-borderColor text-[11px] font-bold text-gray-300">
+                        ${g} ${String(dataBaseCalendario.getDate()).padStart(2, '0')}/${String(dataBaseCalendario.getMonth()+1).padStart(2, '0')}
+                    </div>
+                    <div class="grid grid-cols-3 text-[9px] uppercase tracking-wider text-gray-500 font-bold divide-x divide-borderColor/50">
+                        <div class="py-1">T1 (06-14)</div>
+                        <div class="py-1">T2 (14-22)</div>
+                        <div class="py-1">T3 (22-06)</div>
+                    </div>
+                `;
+                scrollContainer.appendChild(dayDiv);
+                dataBaseCalendario.setDate(dataBaseCalendario.getDate() + 1);
+            });
+        }
+
+        function calcolaDatiTurnoAttivo(data) {
+            const ora = data.getHours();
+            let turno = { nome: "T3 - Turno Notte", ore: "22:00 - 06:00", id: "T3", inizioOra: 22, fineOra: 6 };
+            
+            if (ora >= 6 && ora < 14) {
+                turno = { nome: "T1 - Turno Mattina", ore: "06:00 - 14:00", id: "T1", inizioOra: 6, fineOra: 14 };
+            } else if (ora >= 14 && ora < 22) {
+                turno = { nome: "T2 - Turno Pomeriggio", ore: "14:00 - 22:00", id: "T2", inizioOra: 14, fineOra: 22 };
+            }
+            return turno;
+        }
+
+        function avanzaTempo(ore) {
+            dataSimulata.setTime(dataSimulata.getTime() + ore * 3600000);
+            eseguiSmartPlanning();
+            showToast(`Tempo avanzato di ${ore} ore!`);
+        }
+
+        function eseguiSmartPlanning() {
+            const giorniSettimana = ["Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"];
+            document.getElementById('current-simulated-time').innerHTML = `
+                📅 ${giorniSettimana[dataSimulata.getDay()]} ${String(dataSimulata.getDate()).padStart(2, '0')}/${String(dataSimulata.getMonth()+1).padStart(2, '0')} — <span class="text-accentBlue font-bold">${String(dataSimulata.getHours()).padStart(2, '0')}:${String(dataSimulata.getMinutes()).padStart(2, '0')}</span>
+            `;
+
+            const infoTurno = calcolaDatiTurnoAttivo(dataSimulata);
+            document.getElementById('active-shift-title').textContent = infoTurno.nome;
+            document.getElementById('active-shift-hours').textContent = infoTurno.ore;
+
+            const ordiniAttivi = ordini.filter(o => !ordiniCompletati.includes(o.id));
+            
+            ordiniAttivi.sort((a, b) => {
+                if (a.priorita === "Alta" && b.priorita !== "Alta") return -1;
+                if (b.priorita === "Alta" && a.priorita !== "Alta") return 1;
+                return new Date(a.scadenza) - new Date(b.scadenza);
+            });
+
+            const planningPresse = {};
+            const timelinePresse = {};
+            const ultimoArticoloSuPressa = {};
+
+            presse.forEach(p => {
+                planningPresse[p.id] = [];
+                timelinePresse[p.id] = new Date(2026, 4, 25, 6, 0, 0);
+                ultimoArticoloSuPressa[p.id] = null;
+            });
+
+            let cambiStampoEvitati = 0;
+            let oreAttrezzaggioSalvate = 0;
+
+            ordiniAttivi.forEach(ordine => {
+                const art = articoli.find(a => a.id === ordine.articolo);
+                if (!art) return;
+
+                let presseCompatibili = [];
+                if (art.pressaVincolata) {
+                    presseCompatibili = presse.filter(p => p.stato === "Attiva" && p.id === art.pressaVincolata);
+                } else {
+                    presseCompatibili = presse.filter(p => p.stato === "Attiva" && p.tonnellaggio >= art.tonMin);
+                }
+
+                if (presseCompatibili.length === 0) return;
+
+                const pezziTeoriciOra = (3600 / art.tempoCiclo) * art.impronte;
+                const pezziRealiOra = pezziTeoriciOra * 0.85;
+                const oreProduzione = ordine.qta / pezziRealiOra;
+
+                let pressaScelta = null;
+                let dataFineMinima = null;
+                let setupScelto = 2.0;
+
+                presseCompatibili.forEach(p => {
+                    const pId = p.id;
+                    const oraInizioTest = new Date(timelinePresse[pId].getTime());
+                    const ultimoArtTest = ultimoArticoloSuPressa[pId];
+                    
+                    const setupTest = calcolaTempoAttrezzaggio(ultimoArtTest, art);
+                    const inizioProdTest = aggiungiOreLavorative(oraInizioTest, setupTest);
+                    const fineProdTest = aggiungiOreLavorative(inizioProdTest, oreProduzione);
+                    
+                    if (dataFineMinima === null || fineProdTest < dataFineMinima) {
+                        dataFineMinima = fineProdTest;
+                        pressaScelta = p;
+                        setupScelto = setupTest;
+                    }
+                });
+
+                if (!pressaScelta) return;
+
+                const pId = pressaScelta.id;
+                const oraInizio = new Date(timelinePresse[pId].getTime());
+                let ottimizzato = setupScelto === 0.0;
+
+                if (ottimizzato && ultimoArticoloSuPressa[pId]) {
+                    cambiStampoEvitati++;
+                    oreAttrezzaggioSalvate += 2;
+                }
+
+                if (setupScelto > 0) {
+                    const fineSetup = aggiungiOreLavorative(oraInizio, setupScelto);
+
+                    planningPresse[pId].push({
+                        tipo: "setup",
+                        inizio: new Date(oraInizio.getTime()),
+                        fine: new Date(fineSetup.getTime()),
+                        durata: setupScelto,
+                        articoloSucc: art.id,
+                        descrizioneSucc: art.descrizione,
+                        stampoSucc: art.stampo,
+                        materialeSucc: art.materiale,
+                        coloreSucc: art.colore,
+                        scaffaleStampo: art.scaffale,
+                        temperaturaCl: art.temp,
+                        deumidificazione: art.deum
+                    });
+                    oraInizio.setTime(fineSetup.getTime());
+                }
+
+                const oraFine = aggiungiOreLavorative(oraInizio, oreProduzione);
+
+                planningPresse[pId].push({
+                    tipo: "produzione",
+                    id: ordine.id,
+                    articolo: art.id,
+                    descrizione: art.descrizione,
+                    stampo: art.stampo,
+                    materiale: art.materiale,
+                    colore: art.colore,
+                    qta: ordine.qta,
+                    priorita: ordine.priorita,
+                    ottimizzato: ottimizzato,
+                    inizio: new Date(oraInizio.getTime()),
+                    fine: new Date(oraFine.getTime()),
+                    durata: oreProduzione,
+                    vincolato: art.pressaVincolata !== ""
+                });
+
+                timelinePresse[pId].setTime(oraFine.getTime());
+                ultimoArticoloSuPressa[pId] = art;
+            });
+
+            document.getElementById('kpi-presse').textContent = `${presse.filter(p => p.stato === "Attiva").length} / ${presse.length}`;
+            document.getElementById('kpi-evitati').textContent = cambiStampoEvitati;
+            document.getElementById('kpi-ore-salvate').textContent = `${oreAttrezzaggioSalvate} h`;
+            document.getElementById('kpi-coda').textContent = ordiniAttivi.length;
+
+            disegnaRighePresse(planningPresse);
+            generaCompitiTurnoFissi(planningPresse, infoTurno);
+        }
+
+        function disegnaRighePresse(planning) {
+            const container = document.getElementById('planning-rows');
+            container.innerHTML = '';
+
+            presse.forEach(p => {
+                const riga = document.createElement('div');
+                riga.className = "press-row";
+
+                const infoStatoClass = p.stato === "Attiva" ? "bg-accentGreen" : (p.stato === "Manutenzione" ? "bg-accentOrange" : "bg-accentRed");
+                
+                const clickHandler = ruoloAttivo === "pm" ? `onclick="toggleStatoPressa('${p.id}')"` : "";
+                const pmPointerClass = ruoloAttivo === "pm" ? "cursor-pointer group" : "pointer-events-none";
+
+                let infoCol = `
+                    <div class="press-label" ${clickHandler}>
+                        <div class="flex items-center gap-2 ${pmPointerClass}">
+                            <span class="w-2.5 h-2.5 rounded-full ${infoStatoClass} group-hover:scale-125 transition-all"></span>
+                            <strong class="group-hover:text-accentBlue transition-colors">${p.id}</strong>
+                        </div>
+                        <span class="press-sub">${p.modello} (${p.tonnellaggio}t)</span>
+                        <span class="text-[9px] text-gray-500 uppercase font-semibold mt-1">Stato: ${p.stato} ${ruoloAttivo === 'pm' ? '⚙️' : ''}</span>
+                    </div>
+                `;
+
+                let timelineCol = `<div class="timeline-container bg-darkBg/30 flex items-stretch gap-2 overflow-x-auto py-3">`;
+
+                if (p.stato !== "Attiva") {
+                    timelineCol += `
+                        <div class="bg-red-950/20 border border-accentRed/30 text-accentRed flex items-center justify-center rounded p-4 w-full text-center">
+                            <div class="space-y-1">
+                                <div class="text-xs font-bold uppercase tracking-wider">⚠️ MACCHINA IN MANUTENZIONE</div>
+                                <div class="text-[10px] text-red-200/60">La pianificazione ordinaria è stata ridistribuita in tempo reale</div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    const lavori = planning[p.id] || [];
+                    if (lavori.length === 0) {
+                        timelineCol += `
+                            <div class="text-gray-600 text-[11px] flex items-center justify-center p-4 italic">
+                                Nessun ordine programmato
+                            </div>
+                        `;
+                    } else {
+                        lavori.forEach(l => {
+                            const larghezzaPixel = Math.max(160, Math.floor(l.durata * 12));
+                            const inizioFormattato = l.inizio.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+                            const fineFormattato = l.fine.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+
+                            if (l.tipo === "setup") {
+                                const isSpurgoPesante = l.durata >= 5.0;
+                                const etichettaSetup = isSpurgoPesante ? "🛠️ SPURGO PESANTE" : "🛠️ SETUP";
+                                const classeSetupExtra = isSpurgoPesante ? "border-accentRed bg-red-950/20" : "border-accentOrange bg-amber-950/10";
+
+                                timelineCol += `
+                                    <div class="job-block attrezzaggio job-transition flex-shrink-0 ${classeSetupExtra}" style="width: ${larghezzaPixel}px;">
+                                        <div class="flex justify-between items-center border-b border-borderColor/20 pb-1">
+                                            <span class="text-[9px] font-bold text-accentOrange uppercase tracking-wider">${etichettaSetup}</span>
+                                            <span class="text-[9px] text-gray-500">${l.durata}h</span>
+                                        </div>
+                                        <div class="text-[11px] font-bold text-gray-300">Cambio Stampo</div>
+                                        <div class="text-[10px] text-gray-400 mt-1">Preparazione per ${l.articoloSucc}</div>
+                                        <div class="text-[9px] text-gray-500 mt-auto pt-2 flex justify-between">
+                                            <span>Inizio: ${inizioFormattato}</span>
+                                            <span>Fine: ${fineFormattato}</span>
+                                        </div>
+                                    </div>
+                                `;
+                            } else {
+                                const prioritaClass = l.priorita === "Alta" ? "priorita-alta" : "";
+                                const ottimizzatoClass = l.ottimizzato ? "ottimizzato" : "";
+
+                                timelineCol += `
+                                    <div id="block-${l.id}" class="job-block produzione ${prioritaClass} ${ottimizzatoClass} job-transition flex-shrink-0" style="width: ${larghezzaPixel}px;">
+                                        <div class="job-header">
+                                            <span class="job-id">${l.id}</span>
+                                            <span class="job-badge">${l.materiale} - ${l.colore}</span>
+                                        </div>
+                                        <div class="job-art">
+                                            <strong class="font-semibold text-white">${l.articolo}</strong>
+                                            ${l.ottimizzato ? '<span class="text-[9px] text-accentGreen font-bold tracking-tight">★ OTTIMIZZATO</span>' : ''}
+                                            ${l.vincolato ? '<span class="text-[9px] text-accentBlue font-bold tracking-tight">🔒 VINCOLATO</span>' : ''}
+                                        </div>
+                                        <div class="job-desc">${l.descrizione}</div>
+                                        <div class="job-details">
+                                            <span>Stampo: ${l.stampo}</span>
+                                            <span>Q.tà: ${l.qta.toLocaleString('it-IT')} pz</span>
+                                        </div>
+                                        <div class="job-footer">
+                                            <span>⏳ ${Math.round(l.durata)} ore est.</span>
+                                            <button onclick="apriRichiestaFine('${l.id}', '${p.id}')" class="btn-done bg-accentGreen text-white text-[10px] px-2 py-1 font-bold rounded hover:bg-opacity-80 transition-all flex items-center gap-1">
+                                                🏁 FINITO
+                                            </button>
+                                        </div>
+                                    </div>
+                                `;
+                            }
+                        });
+                    }
+                }
+
+                timelineCol += `</div>`;
+                riga.innerHTML = infoCol + timelineCol;
+                container.appendChild(riga);
+            });
+        }
+
+        function generaCompitiTurnoFissi(planning, infoTurno) {
+            const container = document.getElementById('shift-tasks-container');
+            container.innerHTML = '';
+
+            const inizioTurno = new Date(dataSimulata.getTime());
+            inizioTurno.setHours(infoTurno.inizioOra, 0, 0, 0);
+
+            const fineTurno = new Date(dataSimulata.getTime());
+            fineTurno.setHours(infoTurno.fineOra, 0, 0, 0);
+
+            if (infoTurno.fineOra < infoTurno.inizioOra) {
+                fineTurno.setDate(fineTurno.getDate() + 1);
+            }
+
+            let compitiTrovati = false;
+
+            presse.forEach(p => {
+                if (p.stato !== "Attiva") return;
+                const lavori = planning[p.id] || [];
+
+                lavori.forEach(l => {
+                    const siSovrappone = (l.inizio < fineTurno && l.fine > inizioTurno);
+
+                    if (siSovrappone) {
+                        if (l.tipo !== "setup") return; 
+
+                        compitiTrovati = true;
+                        
+                        let tipoIcona = "🛠️";
+                        let coloreBorder = "border-accentOrange/30 bg-amber-950/10";
+                        
+                        const isSpurgoPesante = l.durata >= 5.0;
+                        const classeSpurgo = isSpurgoPesante ? "text-accentRed font-bold" : "text-accentOrange font-semibold";
+                        const alertSpurgoMsg = isSpurgoPesante ? "⚠️ ATTENZIONE: Cambio da scuro a chiaro. Richiesto lavaggio profondo cilindro!" : "Regolazione standard.";
+
+                        let descrizioneCompito = `
+                            <div class="space-y-1 mt-2 text-[11px]">
+                                <div><span class="text-gray-400">Montaggio Stampo:</span> <strong class="text-white">${l.stampoSucc}</strong></div>
+                                <div><span class="text-gray-400">Ubicazione Magazzino:</span> <span class="${classeSpurgo}">${l.scaffaleStampo}</span></div>
+                                <div><span class="text-gray-400">Polimero/Colore:</span> <strong class="text-white">${l.materialeSucc} (${l.coloreSucc})</strong></div>
+                                <div class="bg-darkBg/60 p-2 rounded border border-borderColor/50 mt-1.5 text-[10px] text-gray-300">
+                                    <div class="font-bold text-accentBlue mb-0.5">Note Spurgo & Cilindro:</div>
+                                    Durata spurgo stimata: <strong>${l.durata} ore</strong>.<br>
+                                    Stato: <span class="${classeSpurgo}">${alertSpurgoMsg}</span>
+                                </div>
+                            </div>
+                        `;
+
+                        const taskKey = `task_${infoTurno.id}_${p.id}_setup_${l.articoloSucc}`;
+                        const isChecked = localStorage.getItem(taskKey) === 'true' ? 'checked' : '';
+
+                        const taskCard = document.createElement('div');
+                        taskCard.className = `p-3 rounded-lg border ${coloreBorder} text-xs flex gap-3 transition-all`;
+                        taskCard.innerHTML = `
+                            <div class="flex items-start pt-0.5">
+                                <input type="checkbox" id="${taskKey}" ${isChecked} onchange="salvaSpuntaTask('${taskKey}')" class="w-4 h-4 rounded text-accentBlue bg-darkBg border-borderColor focus:ring-0 focus:ring-offset-0 cursor-pointer">
+                            </div>
+                            <div class="flex-grow">
+                                <div class="flex items-center gap-1.5 font-bold text-white mb-0.5">
+                                    <span>${tipoIcona}</span>
+                                    <span>Pressa ${p.id}</span>
+                                    <span class="text-[9px] font-semibold text-gray-500">${p.modello}</span>
+                                </div>
+                                ${descrizioneCompito}
+                            </div>
+                        `;
+                        container.appendChild(taskCard);
+                    }
+                });
+            });
+
+            if (!compitiTrovati) {
+                container.innerHTML = `
+                    <div class="text-center py-6 text-gray-500 text-[11px] italic border border-dashed border-borderColor rounded-lg bg-darkBg/20">
+                        🟢 Nessun cambio stampo programmato per il turno corrente. Produzione regolare a regime.
+                    </div>
+                `;
+            }
+        }
+
+        function salvaSpuntaTask(key) {
+            const checkbox = document.getElementById(key);
+            if (checkbox) {
+                localStorage.setItem(key, checkbox.checked);
+            }
+        }
+
+        function apriRichiestaFine(idOrdine, idPressa) {
+            azioneInCorso = { tipo: "completamento", id: idOrdine, pressa: idPressa };
+            document.getElementById('testo-conferma').innerHTML = `
+                Confermi la <strong class="text-accentGreen">FINE PRODUZIONE</strong> per l'ordine <strong class="text-white">${idOrdine}</strong> sulla pressa <strong class="text-white">${idPressa}</strong>? <br><br>
+                L'ordine verrà archiviato e le commesse successive scaleranno automaticamente indietro.
+            `;
+            document.getElementById('modal-conferma').classList.remove('hidden');
+        }
+
+        function apriConfermaReset() {
+            azioneInCorso = { tipo: "reset" };
+            document.getElementById('testo-conferma').innerHTML = `
+                Sei sicuro di voler <strong class="text-accentRed">RESETTARE</strong> l'intero database del tablet?<br><br>
+                Tutti gli ordini aggiunti e lo stato delle presse torneranno ai valori di fabbrica.
+            `;
+            document.getElementById('modal-conferma').classList.remove('hidden');
+        }
+
+        function chiudiConferma() {
+            document.getElementById('modal-conferma').classList.add('hidden');
+            azioneInCorso = null;
+        }
+
+        function eseguiAzioneConfermata() {
+            if (!azioneInCorso) return;
+
+            if (azioneInCorso.tipo === "completamento") {
+                const idOrdine = azioneInCorso.id;
+                showToast(`Archiviazione ordine ${idOrdine} in corso...`);
+                
+                setTimeout(() => {
+                    if (!ordiniCompletati.includes(idOrdine)) {
+                        ordiniCompletati.push(idOrdine);
+                        localStorage.setItem('mp_completati', JSON.stringify(ordiniCompletati));
+                        eseguiSmartPlanning();
+                        aggiornaListaSyncPM();
+                        showToast(`Ordine ${idOrdine} completato con successo!`);
+                    }
+                }, 400);
+            } else if (azioneInCorso.tipo === "reset") {
+                localStorage.clear();
+                ordini = [];
+                ordiniCompletati = [];
+                presse.forEach(p => p.stato = "Attiva");
+                dataSimulata = new Date(2026, 4, 25, 17, 13, 0);
+                ruoloAttivo = "officina";
+                inizializzaDati();
+                applicaInterfacciaRuolo();
+                showToast("Database resettato ai dati iniziali!");
+            }
+
+            chiudiConferma();
+        }
+
+        function toggleStatoPressa(idPressa) {
+            const p = presse.find(pr => pr.id === idPressa);
+            if (p) {
+                if (p.stato === "Attiva") p.stato = "Manutenzione";
+                else if (p.stato === "Manutenzione") p.stato = "Guasto";
+                else p.stato = "Attiva";
+                
+                localStorage.setItem('mp_presse', JSON.stringify(presse));
+                eseguiSmartPlanning();
+                showToast(`Pressa ${idPressa} impostata su: ${p.stato}`);
+            }
+        }
+
+        function apriModalAggiungi() {
+            document.getElementById('input-articolo').value = '';
+            document.getElementById('anteprime-tecniche').textContent = '';
+            document.getElementById('modal-aggiungi').classList.remove('hidden');
+        }
+
+        function chiudiModalAggiungi() {
+            document.getElementById('modal-aggiungi').classList.add('hidden');
+        }
+
+        function salvaNuovoOrdine(e) {
+            e.preventDefault();
+            
+            const articoloRaw = document.getElementById('input-articolo').value.trim().toUpperCase();
+            const qta = parseInt(document.getElementById('input-qta').value);
+            const scadenza = document.getElementById('input-scadenza').value;
+            const priorita = document.querySelector('input[name="priorita"]:checked').value;
+
+            const artEsistente = articoli.find(a => a.id === articoloRaw);
+            if (!artEsistente) {
+                showToast("❌ Errore: Il codice articolo inserito non esiste!");
                 return;
             }
 
-            PRESSE_SORGENTE.forEach(pressa => {
-                const tr = document.createElement('tr');
+            const nuovoId = `ORD-2026-${String(ordini.length + 1).padStart(3, '0')}`;
 
-                // Colonna Pressa
-                const tdPressa = document.createElement('td');
-                tdPressa.className = 'pressa-info';
-                tdPressa.innerHTML = `
-                    <div>${pressa.id}</div>
-                    <div class="pressa-sub">${pressa.modello || 'Modello N/D'}</div>
-                    <div class="pressa-sub" style="color: var(--primary); font-weight: 600;">Ton: ${pressa.tonnellaggio || pressa.ton || 'N/D'}t</div>
-                `;
-                tr.appendChild(tdPressa);
+            const nuovoOrdine = {
+                id: nuovoId,
+                articolo: articoloRaw,
+                qta: qta,
+                scadenza: scadenza,
+                priorita: priorita
+            };
 
-                // Colonne per i 3 Turni
-                const turni = ["Mattina", "Pomeriggio", "Notte"];
-                turni.forEach(turno => {
-                    const tdTurno = document.createElement('td');
-                    tdTurno.className = 'turno-cella';
+            ordini.push(nuovoOrdine);
+            localStorage.setItem('mp_ordini', JSON.stringify(ordini));
 
-                    // Cerca l'ordine allocato
-                    const ordine = ORDINI_SORGENTE.find(ord => 
-                        (ord.pressa === pressa.id || ord.pressa_vincolata === pressa.id) &&
-                        ord.giorno === giornoSelezionato &&
-                        ord.turno === turno
-                    );
+            chiudiModalAggiungi();
+            eseguiSmartPlanning();
+            showToast(`Pianificato con successo: ${nuovoId} per ${articoloRaw}!`);
+        }
 
-                    if (ordine) {
-                        const closedKey = `closed_${ordine.id}`;
-                        const isClosed = localStorage.getItem(closedKey) === 'true';
+        function showToast(testo) {
+            const toast = document.getElementById('toast');
+            toast.textContent = testo;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
 
-                        // Trova l'articolo correlato
-                        const articolo = ARTICOLI_SORGENTE.find(art => art.id === ordine.articolo);
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
 
-                        // Genera checklist dinamica
-                        const compiti = [
-                            `Verifica stampo ${articolo?.stampo || 'N/D'}`,
-                            `Prep. materiale: ${articolo?.materiale || 'N/D'}`,
-                            `Avvio e controllo stampo`
-                        ];
+        window.onload = function() {
+            const inputScadenza = document.getElementById('input-scadenza');
+            if (inputScadenza) {
+                const oggi = new Date(2026, 4, 25);
+                const aaaa = oggi.getFullYear();
+                const mm = String(oggi.getMonth() + 1).padStart(2, '0');
+                const gg = String(oggi.getDate()).padStart(2, '0');
+                inputScadenza.min = `${aaaa}-${mm}-${gg}`;
+                inputScadenza.value = `${aaaa}-${mm}-${String(oggi.getDate() + 5).padStart(2, '0')}`;
+            }
 
-                        let taskHTML = "";
-                        compiti.forEach((task, idx) => {
-                            const taskKey = `task_${ordine.id}_${idx}`;
-                            const isChecked = localStorage.getItem(taskKey) === 'true';
-                            taskHTML += `
-                                <label class="task-item" onclick="event.stopPropagation()">
-                                    <input type="checkbox" id="${taskKey}" ${isChecked ? 'checked' : ''} 
-                                           onchange="salvaStatoTask('${taskKey}', this.checked)">
-                                    <span class="task-text">${task}</span>
-                                </label>
-                            `;
-                        });
-
-                        tdTurno.innerHTML = `
-                            <div class="card-attiva ${isClosed ? 'completato' : ''}" id="card-${ordine.id}" onclick="apriSidebar('${ordine.id}')">
-                                <div class="card-head">
-                                    <span class="ordine-id">${ordine.id}</span>
-                                    <span class="badge-articolo">${ordine.articolo}</span>
-                                </div>
-                                <div class="produzione-info">
-                                    <div class="info-riga">
-                                        <span class="label">Pezzi target:</span>
+            inizializzaDati();
+        };
+    </script>
+</body>
+</html>
