@@ -1,40 +1,58 @@
 import csv
 import json
 import os
-import re
+
+def leggi_csv(nome_file):
+    percorso = os.path.join('data', nome_file)
+    if not os.path.exists(percorso):
+        print(f"Attenzione: {percorso} non trovato.")
+        return []
+    with open(percorso, mode='r', encoding='utf-8-sig') as f:
+        return list(csv.DictReader(f))
 
 def genera_planning():
-    # Carica dati e gestisci le intestazioni (assumendo i nomi corretti dai CSV)
-    try:
-        dati = {
-            "articoli": list(csv.DictReader(open('data/articoli.csv', encoding='utf-8'))),
-            "presse": list(csv.DictReader(open('data/presse.csv', encoding='utf-8'))),
-            "ordini": list(csv.DictReader(open('data/ordini.csv', encoding='utf-8')))
-        }
-    except Exception as e:
-        print(f"Errore nella lettura dei CSV: {e}")
+    # Caricamento dei dati dai file CSV
+    articoli = leggi_csv('articoli.csv')
+    presse = leggi_csv('presse.csv')
+    ordini = leggi_csv('ordini.csv')
+
+    # Verifica la presenza del file HTML
+    html_path = os.path.join('docs', 'index.html')
+    if not os.path.exists(html_path):
+        print("Errore: docs/index.html non trovato.")
         return
 
-    # Leggi il template
-    with open('docs/index.html', 'r', encoding='utf-8') as f:
-        html = f.read()
+    with open(html_path, 'r', encoding='utf-8') as f:
+        html_content = f.read()
 
-    # Prepara il blocco JS - assicurati che i nomi dei campi corrispondano ai tuoi CSV
-    # Esempio: se nel CSV la colonna è 'ID_Ordine', nel JS useremo ordine.ID_Ordine
-    dati_js = f"<script>const APP_DATA = {json.dumps(dati, ensure_ascii=False)};</script>"
-    
-    # PULIZIA: Rimuovi il vecchio blocco
-    html_pulito = re.sub(r'<script>const APP_DATA = .*?</script>', '', html, flags=re.DOTALL)
+    # Prepara le stringhe JSON dei dati
+    json_articoli = json.dumps(articoli, ensure_ascii=False)
+    json_presse = json.dumps(presse, ensure_ascii=False)
+    json_ordini = json.dumps(ordini, ensure_ascii=False)
 
-    # Inserimento sicuro
-    if "<!-- DATA_READY -->" in html_pulito:
-        nuovo_html = html_pulito.replace("<!-- DATA_READY -->", f"<!-- DATA_READY -->\n{dati_js}")
+    # Costruisci il blocco dati JavaScript sostitutivo
+    nuovo_blocco_dati = (
+        "// DATA_START\n"
+        f"        const ARTICOLI_SORGENTE = {json_articoli};\n"
+        f"        const PRESSE_SORGENTE = {json_presse};\n"
+        f"        const ORDINI_SORGENTE = {json_ordini};\n"
+        "        // DATA_END"
+    )
+
+    # Cerca i marcatori di inizio e fine dati nell'HTML e sostituisci il contenuto
+    marker_start = "// DATA_START"
+    marker_end = "// DATA_END"
+
+    if marker_start in html_content and marker_end in html_content:
+        parte_iniziale = html_content.split(marker_start)[0]
+        parte_finale = html_content.split(marker_end)[1]
+        html_aggiornato = parte_iniziale + nuovo_blocco_dati + parte_finale
+        
+        with open(html_path, 'w', encoding='utf-8') as f:
+            f.write(html_aggiornato)
+        print("Planning rigenerato con successo!")
     else:
-        print("Errore: Segnaposto <!-- DATA_READY --> non trovato")
-        return
-
-    with open('docs/index.html', 'w', encoding='utf-8') as f:
-        f.write(nuovo_html)
+        print("Errore: Marcatori di iniezione dati non trovati nel file HTML.")
 
 if __name__ == "__main__":
     genera_planning()
