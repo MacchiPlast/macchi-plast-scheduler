@@ -5,62 +5,67 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Planning Produzione - Macchi Plast</title>
     <style>
-        body { background-color: #121212; color: #e0e0e0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; }
+        body { background-color: #121212; color: #e0e0e0; font-family: 'Segoe UI', sans-serif; padding: 20px; }
         h1 { color: #ffffff; border-bottom: 2px solid #333; padding-bottom: 10px; }
         .card { background: #1e1e1e; border: 1px solid #333; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
-        .task-item { display: flex; align-items: center; padding: 10px; border-bottom: 1px solid #333; }
-        input[type="checkbox"] { width: 20px; height: 20px; margin-right: 15px; cursor: pointer; }
+        .task-list { list-style: none; padding: 0; }
+        .task-item { display: flex; align-items: center; padding: 8px 0; border-bottom: 1px solid #333; }
+        input[type="checkbox"] { width: 18px; height: 18px; margin-right: 12px; cursor: pointer; }
+        .completed { opacity: 0.5; filter: grayscale(1); }
     </style>
 </head>
 <body>
 
     <h1>Programmazione Presse</h1>
-    
-    <!-- Contenitore principale dove appariranno i dati -->
-    <div id="dashboard" class="grid">
-        <p>Caricamento dati in corso...</p>
-    </div>
+    <div id="dashboard" class="grid">Caricamento in corso...</div>
 
-    <!-- Questo commento è FONDAMENTALE per il file Python -->
     <!-- DATA_READY -->
 
     <script>
-        // Questa funzione viene chiamata dopo che il file Python inietta APP_DATA
         function caricaDashboard() {
             const container = document.getElementById('dashboard');
             
             if (typeof APP_DATA === 'undefined') {
-                container.innerHTML = "<p>Errore: Dati non caricati. Verifica il file scheduler.py</p>";
+                container.innerHTML = "<p>Errore: Dati non caricati. Verifica scheduler.py</p>";
                 return;
             }
 
-            container.innerHTML = ""; // Pulisce il messaggio di caricamento
+            container.innerHTML = ""; 
 
-            // Esempio: Mostriamo gli ordini caricati
+            // Generazione dinamica delle card per ogni ordine
             APP_DATA.ordini.forEach(ordine => {
                 const card = document.createElement('div');
                 card.className = 'card';
+                card.id = `card-${ordine.id}`;
+                
+                // Recupero stato salvato
+                const isChecked = localStorage.getItem('status_' + ordine.id) === 'true';
+                if (isChecked) card.classList.add('completed');
+
                 card.innerHTML = `
                     <h3>Ordine: ${ordine.id}</h3>
                     <p>Articolo: ${ordine.articolo}</p>
                     <p>Quantità: ${ordine.qta}</p>
-                    <label class="task-item">
-                        <input type="checkbox" onchange="salvaStato('${ordine.id}', this.checked)">
-                        Segna come completato
-                    </label>
+                    <ul class="task-list">
+                        <li class="task-item">
+                            <input type="checkbox" ${isChecked ? 'checked' : ''} 
+                                   onchange="toggleStato('${ordine.id}', this.checked)">
+                            Conferma chiusura turno
+                        </li>
+                    </ul>
                 `;
                 container.appendChild(card);
             });
         }
 
-        // Funzione per salvare le spunte su tablet
-        function salvaStato(id, stato) {
-            localStorage.setItem('stato_' + id, stato);
-            console.log("Stato salvato per " + id + ": " + stato);
+        function toggleStato(id, stato) {
+            localStorage.setItem('status_' + id, stato);
+            const card = document.getElementById('card-' + id);
+            if (stato) card.classList.add('completed');
+            else card.classList.remove('completed');
         }
 
-        // Avvio
         window.onload = caricaDashboard;
     </script>
 </body>
