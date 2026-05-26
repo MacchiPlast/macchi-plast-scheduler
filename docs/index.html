@@ -3,67 +3,562 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planning Produzione - Macchi Plast</title>
+    <title>Smart Scheduler - Macchi Plast</title>
+    <!-- Icone Lucide per una grafica moderna -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        body { background-color: #121212; color: #e0e0e0; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; }
-        h1 { color: #ffffff; border-bottom: 2px solid #333; padding-bottom: 10px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
-        .card { background: #1e1e1e; border: 1px solid #333; padding: 15px; border-radius: 8px; }
-        .completed { opacity: 0.5; filter: grayscale(1); }
-        .task-item { margin-top: 10px; display: block; cursor: pointer; }
+        :root {
+            --bg-dark: #09090b;
+            --bg-panel: #14141b;
+            --bg-card: #1c1c24;
+            --bg-card-hover: #232331;
+            --border: #2e2e3f;
+            --text-main: #f4f4f5;
+            --text-muted: #a1a1aa;
+            --primary: #00d4ff;
+            --green: #10b981;
+            --yellow: #f59e0b;
+            --red: #ef4444;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        /* Layout Principale */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-box {
+            background: linear-gradient(135deg, var(--primary), #0088cc);
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            color: #000;
+        }
+
+        h1 {
+            font-size: 1.6rem;
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+
+        /* Selettore Giorno */
+        .giorni-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+
+        .giorno-btn {
+            background-color: var(--bg-panel);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .giorno-btn:hover {
+            border-color: var(--primary);
+            color: #fff;
+        }
+
+        .giorno-btn.active {
+            background-color: var(--primary);
+            color: #000;
+            border-color: var(--primary);
+        }
+
+        /* Griglia Gantt / Tabellone */
+        .gantt-container {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            background-color: var(--bg-panel);
+        }
+
+        .gantt-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            min-width: 1000px;
+        }
+
+        .gantt-table th, .gantt-table td {
+            border: 1px solid var(--border);
+            padding: 14px;
+            vertical-align: top;
+        }
+
+        .gantt-table th {
+            background-color: #0e0e14;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 700;
+        }
+
+        /* Righe Presse */
+        .pressa-info {
+            background-color: #0e0e14;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .pressa-sub {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: normal;
+            margin-top: 4px;
+        }
+
+        /* Celle Turni */
+        .turno-cella {
+            position: relative;
+            min-height: 160px;
+            height: 100%;
+        }
+
+        .stato-libero {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #43435c;
+            font-style: italic;
+            font-size: 0.85rem;
+            border: 1.5px dashed #242435;
+            border-radius: 8px;
+            padding: 20px;
+            background: rgba(255,255,255,0.01);
+        }
+
+        /* Card Ordine Attivo */
+        .card-attiva {
+            background-color: var(--bg-card);
+            border-left: 4px solid var(--primary);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .card-attiva:hover {
+            background-color: var(--bg-card-hover);
+            transform: translateY(-2px);
+        }
+
+        .card-attiva.completato {
+            opacity: 0.35;
+            filter: grayscale(1);
+            border-left-color: var(--text-muted);
+        }
+
+        .card-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .ordine-id {
+            font-weight: bold;
+            font-size: 1rem;
+            color: #fff;
+        }
+
+        .badge-articolo {
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--primary);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .produzione-info {
+            font-size: 0.85rem;
+            margin-bottom: 12px;
+            border-bottom: 1px solid #28283a;
+            padding-bottom: 10px;
+        }
+
+        .info-riga {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .info-riga .label { color: var(--text-muted); }
+        .info-riga .value { color: #fff; font-weight: 600; }
+
+        /* Lista Task */
+        .task-list {
+            margin-bottom: 15px;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 0.8rem;
+            margin-bottom: 6px;
+            cursor: pointer;
+        }
+
+        .task-item input[type="checkbox"] {
+            margin-top: 2px;
+            width: 15px;
+            height: 15px;
+            accent-color: var(--primary);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .task-text {
+            color: var(--text-main);
+        }
+
+        .task-item input[type="checkbox"]:checked + .task-text {
+            color: var(--text-muted);
+            text-decoration: line-through;
+        }
+
+        /* Chiusura Turno */
+        .chiusura-box {
+            background: rgba(0, 212, 255, 0.03);
+            border: 1px dashed rgba(0, 212, 255, 0.2);
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        .chiusura-lbl {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .chiusura-lbl input {
+            accent-color: var(--primary);
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Sidebar Dettagli */
+        .sidebar {
+            position: fixed;
+            right: -420px;
+            top: 0;
+            width: 380px;
+            height: 100vh;
+            background-color: #111116;
+            border-left: 1px solid var(--border);
+            box-shadow: -10px 0 30px rgba(0,0,0,0.6);
+            padding: 25px;
+            box-sizing: border-box;
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .sidebar.open {
+            right: 0;
+        }
+
+        .sidebar-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .sidebar-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.5rem;
+        }
+
+        .sidebar-close:hover { color: #fff; }
+
+        .parametro-gruppo {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .parametro-title {
+            color: var(--primary);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .parametro-val {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        /* Overlay */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            z-index: 999;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        /* Modal Sblocco PIN */
+        .modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: #15151f;
+            border: 1px solid var(--border);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            z-index: 1001;
+            display: none;
+            text-align: center;
+            width: 320px;
+        }
+
+        .modal.active {
+            display: block;
+            transform: translate(-50%, -50%) scale(1);
+            transition: transform 0.2s ease-out;
+        }
+
+        .pin-input {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: #fff;
+            font-size: 2rem;
+            text-align: center;
+            letter-spacing: 8px;
+            padding: 10px;
+            width: 100%;
+            box-sizing: border-box;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .modal-btn {
+            background-color: var(--primary);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .modal-btn.cancel {
+            background: none;
+            color: var(--text-muted);
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
 
-    <h1>Programmazione Presse</h1>
-    <div id="dashboard" class="grid">Caricamento in corso...</div>
+    <header>
+        <div class="header-title">
+            <div class="logo-box">M</div>
+            <h1>Macchi Plast &ndash; Smart Gantt Plan</h1>
+        </div>
+        <div class="status-badge">
+            <i data-lucide="radio" style="color: var(--green); width: 18px; height: 18px;"></i>
+            <span style="font-weight: 600; font-size: 0.85rem; margin-left: 8px;">Tablet Monitor Attivo</span>
+        </div>
+    </header>
 
-    <!-- Carica i dati generati dal bot -->
-    <script src="dati.js"></script>
+    <!-- Navigazione Giorni -->
+    <div class="giorni-bar">
+        <button class="giorno-btn active" onclick="cambiaGiorno('Lunedì')">Lunedì</button>
+        <button class="giorno-btn" onclick="cambiaGiorno('Martedì')">Martedì</button>
+        <button class="giorno-btn" onclick="cambiaGiorno('Mercoledì')">Mercoledì</button>
+        <button class="giorno-btn" onclick="cambiaGiorno('Giovedì')">Giovedì</button>
+        <button class="giorno-btn" onclick="cambiaGiorno('Venerdì')">Venerdì</button>
+        <button class="giorno-btn" onclick="cambiaGiorno('Sabato')">Sabato</button>
+    </div>
+
+    <!-- Tabellone Gantt a Matrice -->
+    <div class="gantt-container">
+        <table class="gantt-table">
+            <thead>
+                <tr>
+                    <th style="width: 13%;">Pressa</th>
+                    <th style="width: 29%;">T1 &ndash; Mattina (06:00 - 14:00)</th>
+                    <th style="width: 29%;">T2 &ndash; Pomeriggio (14:00 - 22:00)</th>
+                    <th style="width: 29%;">T3 &ndash; Notte (22:00 - 06:00)</th>
+                </tr>
+            </thead>
+            <tbody id="ganttBody">
+                <!-- Generato Dinamicamente -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Sidebar Dettagli Stampo -->
+    <div class="overlay" id="overlay" onclick="chiudiSidebar()"></div>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-head">
+            <h2 id="sideTitle" style="margin: 0; font-size: 1.3rem;">Dettagli Attrezzaggio</h2>
+            <button class="sidebar-close" onclick="chiudiSidebar()">&times;</button>
+        </div>
+        <div id="sidebarContent"></div>
+    </div>
+
+    <!-- Modal per PIN Chiusura -->
+    <div class="modal" id="pinModal">
+        <h3 style="margin: 0;">Sblocco Capoturno</h3>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">Inserisci il codice PIN per confermare la chiusura.</p>
+        <input type="password" maxlength="4" class="pin-input" id="pinField" placeholder="••••">
+        <button class="modal-btn" onclick="validaPin()">Conferma</button>
+        <button class="modal-btn cancel" onclick="chiudiPinModal()">Annulla</button>
+    </div>
 
     <script>
-        function caricaDashboard() {
-            const container = document.getElementById('dashboard');
-            
-            // Verifica che i dati siano stati caricati dal file dati.js
-            if (typeof APP_DATA === 'undefined') {
-                container.innerHTML = "<p>Errore: Impossibile caricare i dati. Verifica il file dati.js</p>";
+        // DATA_START
+        const ARTICOLI_SORGENTE = [];
+        const PRESSE_SORGENTE = [];
+        const ORDINI_SORGENTE = [];
+        // DATA_END
+
+        let giornoSelezionato = "Lunedì";
+        let targetOrdineChiusura = null;
+        let targetCheckboxChiusura = null;
+
+        function cambiaGiorno(giorno) {
+            giornoSelezionato = giorno;
+            document.querySelectorAll('.giorno-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.innerText === giorno);
+            });
+            costruisciTabellone();
+        }
+
+        function costruisciTabellone() {
+            const tbody = document.getElementById('ganttBody');
+            tbody.innerHTML = "";
+
+            if (PRESSE_SORGENTE.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 40px;">
+                    Nessun dato importato nei CSV o scheduler.py non ancora eseguito.
+                </td></tr>`;
                 return;
             }
 
-            container.innerHTML = ""; 
+            PRESSE_SORGENTE.forEach(pressa => {
+                const tr = document.createElement('tr');
 
-            // Ciclo sugli ordini
-            APP_DATA.ordini.forEach(ordine => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.id = 'card-' + ordine.id;
-                
-                const isChecked = localStorage.getItem('status_' + ordine.id) === 'true';
-                if (isChecked) card.classList.add('completed');
-
-                card.innerHTML = `
-                    <h3>Ordine: ${ordine.id}</h3>
-                    <p>Articolo: ${ordine.articolo}</p>
-                    <p>Quantità: ${ordine.qta}</p>
-                    <label class="task-item">
-                        <input type="checkbox" ${isChecked ? 'checked' : ''} 
-                               onchange="toggleStato('${ordine.id}', this.checked)">
-                        Conferma chiusura turno
-                    </label>
+                // Colonna Pressa
+                const tdPressa = document.createElement('td');
+                tdPressa.className = 'pressa-info';
+                tdPressa.innerHTML = `
+                    <div>${pressa.id}</div>
+                    <div class="pressa-sub">${pressa.modello || 'Modello N/D'}</div>
+                    <div class="pressa-sub" style="color: var(--primary); font-weight: 600;">Ton: ${pressa.tonnellaggio || pressa.ton || 'N/D'}t</div>
                 `;
-                container.appendChild(card);
-            });
-        }
+                tr.appendChild(tdPressa);
 
-        function toggleStato(id, stato) {
-            localStorage.setItem('status_' + id, stato);
-            const card = document.getElementById('card-' + id);
-            card.classList.toggle('completed', stato);
-        }
+                // Colonne per i 3 Turni
+                const turni = ["Mattina", "Pomeriggio", "Notte"];
+                turni.forEach(turno => {
+                    const tdTurno = document.createElement('td');
+                    tdTurno.className = 'turno-cella';
 
-        // Attendiamo che lo script esterno sia pronto
-        window.onload = caricaDashboard;
-    </script>
-</body>
-</html>
+                    // Cerca l'ordine allocato
+                    const ordine = ORDINI_SORGENTE.find(ord => 
+                        (ord.pressa === pressa.id || ord.pressa_vincolata === pressa.id) &&
+                        ord.giorno === giornoSelezionato &&
+                        ord.turno === turno
+                    );
+
+                    if (ordine) {
+                        const closedKey = `closed_${ordine.id}`;
+                        const isClosed = localStorage.getItem(closedKey) === 'true';
+
+                        // Trova l'articolo correlato
+                        const articolo = ARTICOLI_SORGENTE.find(art => art.id === ordine.articolo);
+
+                        // Genera checklist dinamica
+                        const compiti = [
+                            `Verifica stampo ${articolo?.stampo || 'N/D'}`,
+                            `Prep. materiale: ${articolo?.materiale || 'N/D'}`,
+                            `Avvio e controllo stampo`
+                        ];
+
+                        let taskHTML = "";
+                        compiti.forEach((task, idx) => {
+                            const taskKey = `task_${ordine.id}_${idx}`;
+                            const isChecked = localStorage.getItem(taskKey) === 'true';
+                            taskHTML += `
+                                <label class="task-item" onclick="event.stopPropagation()">
+                                    <input type="checkbox" id="${taskKey}" ${isChecked ? 'checked' : ''} 
+                                           onchange="salvaStatoTask('${taskKey}', this.checked)">
+                                    <span class="task-text">${task}</span>
+                                </label>
+                            `;
+                        });
+
+                        tdTurno.innerHTML = `
+                            <div class="card-attiva ${isClosed ? 'completato' : ''}" id="card-${ordine.id}" onclick="apriSidebar('${ordine.id}')">
+                                <div class="card-head">
+                                    <span class="ordine-id">${ordine.id}</span>
+                                    <span class="badge-articolo">${ordine.articolo}</span>
+                                </div>
+                                <div class="produzione-info">
+                                    <div class="info-riga">
+                                        <span class="label">Pezzi target:</span>
