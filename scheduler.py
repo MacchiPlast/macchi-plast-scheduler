@@ -2,33 +2,38 @@ import csv
 import json
 import os
 
-def leggi_csv(nome_file):
-    percorso = os.path.join('data', nome_file)
-    if not os.path.exists(percorso):
-        return []
-    with open(percorso, mode='r', encoding='utf-8') as f:
-        return list(csv.DictReader(f))
-
 def genera_planning():
+    # Carica dati
     dati = {
-        "articoli": leggi_csv('articoli.csv'),
-        "presse": leggi_csv('presse.csv'),
-        "ordini": leggi_csv('ordini.csv')
+        "articoli": list(csv.DictReader(open('data/articoli.csv', encoding='utf-8'))),
+        "presse": list(csv.DictReader(open('data/presse.csv', encoding='utf-8'))),
+        "ordini": list(csv.DictReader(open('data/ordini.csv', encoding='utf-8')))
     }
 
-    # Carica il template originale
+    # Leggi il template
     with open('docs/index.html', 'r', encoding='utf-8') as f:
         html = f.read()
 
-    # Prepara il blocco dati con il segnaposto incluso per il prossimo giro
+    # Prepara il blocco JS
     dati_js = f"<script>const APP_DATA = {json.dumps(dati, ensure_ascii=False)};</script>"
-    segnaposto = "<!-- DATA_READY -->"
     
-    # Sostituisce il segnaposto con i dati + il segnaposto stesso
-    nuovo_html = html.split(segnaposto)[0] + segnaposto + "\n" + dati_js + "\n" + html.split(segnaposto)[1]
+    # Inserimento sicuro: cerchiamo <!-- DATA_READY --> e lo sostituiamo con segnaposto + dati
+    if "<!-- DATA_READY -->" in html:
+        nuovo_html = html.replace("<!-- DATA_READY -->", f"<!-- DATA_READY -->\n{dati_js}")
+    else:
+        # Se il segnaposto manca, non può funzionare
+        print("Errore: Segnaposto <!-- DATA_READY --> non trovato in docs/index.html")
+        return
 
     with open('docs/index.html', 'w', encoding='utf-8') as f:
         f.write(nuovo_html)
 
 if __name__ == "__main__":
     genera_planning()
+```
+
+### 2. Verifica `docs/index.html`
+Assicurati che il tuo file `docs/index.html` contenga esattamente questa riga di commento, senza spazi aggiuntivi tra i tag:
+
+```html
+<!-- DATA_READY -->
