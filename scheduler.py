@@ -1,6 +1,7 @@
 import csv
 import json
 import os
+import re
 
 def genera_planning():
     # Carica dati
@@ -17,11 +18,14 @@ def genera_planning():
     # Prepara il blocco JS
     dati_js = f"<script>const APP_DATA = {json.dumps(dati, ensure_ascii=False)};</script>"
     
-    # Inserimento sicuro: cerchiamo <!-- DATA_READY --> e lo sostituiamo con segnaposto + dati
-    if "<!-- DATA_READY -->" in html:
-        nuovo_html = html.replace("<!-- DATA_READY -->", f"<!-- DATA_READY -->\n{dati_js}")
+    # PULIZIA: Rimuovi qualsiasi precedente blocco <script> che contiene APP_DATA
+    # Questo cerca il tag script che contiene APP_DATA e lo rimuove
+    html_pulito = re.sub(r'<script>const APP_DATA = .*?</script>', '', html, flags=re.DOTALL)
+
+    # Inserimento sicuro
+    if "<!-- DATA_READY -->" in html_pulito:
+        nuovo_html = html_pulito.replace("<!-- DATA_READY -->", f"<!-- DATA_READY -->\n{dati_js}")
     else:
-        # Se il segnaposto manca, non può funzionare
         print("Errore: Segnaposto <!-- DATA_READY --> non trovato in docs/index.html")
         return
 
@@ -30,10 +34,3 @@ def genera_planning():
 
 if __name__ == "__main__":
     genera_planning()
-```
-
-### 2. Verifica `docs/index.html`
-Assicurati che il tuo file `docs/index.html` contenga esattamente questa riga di commento, senza spazi aggiuntivi tra i tag:
-
-```html
-<!-- DATA_READY -->
