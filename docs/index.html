@@ -369,7 +369,7 @@
                 scaffale: a.Ubicazione || "Magazzino", temp: a.Temp || "200°C", deum: a.Deum || "No",
                 pressaVincolata: a.Pressa_Vincolata || ""
             })) : [
-                { id: "ART-001", descrizione: "Scatola PP Nera", stampo: "ST-001", impronte: 2, tempoCiclo: 25, materiale: "PP", colore: "Nero", tonMin: 100, scaffale: "Scaffale A-04", temp: "200°C", deum: "No", pressaVincolata: "" },
+                { id: "1500", descrizione: "Manopola Nera", stampo: "ST-001", impronte: 2, tempoCiclo: 25, materiale: "PP", colore: "Nero", tonMin: 100, scaffale: "Scaffale A-04", temp: "200°C", deum: "No", pressaVincolata: "" },
                 { id: "ART-022", descrizione: "Coperchio ABS Grigio", stampo: "ST-022", impronte: 1, tempoCiclo: 30, materiale: "ABS", colore: "Grigio", tonMin: 150, scaffale: "Scaffale B-12", temp: "230°C", deum: "Sì, 2h a 80°C", pressaVincolata: "P05" },
                 { id: "ART-045", descrizione: "Connettore PA6 Naturale", stampo: "ST-045", impronte: 4, tempoCiclo: 20, materiale: "PA6", colore: "Naturale", tonMin: 50, scaffale: "Scaffale C-01", temp: "260°C", deum: "Sì, 4h a 90°C", pressaVincolata: "" }
             ];
@@ -377,17 +377,8 @@
             presse = PRESSE_SORGENTE.length > 0 ? PRESSE_SORGENTE.map(p => ({
                 id: p.ID_Pressa, modello: p.Modello, tonnellaggio: parseInt(p.Tonnellaggio), stato: p.Stato
             })) : [
-                { id: "P01", modello: "Arburg 50t", tonnellaggio: 50, stato: "Attiva" },
-                { id: "P02", modello: "Negri Bossi 100t", tonnellaggio: 100, stato: "Attiva" },
-                { id: "P03", modello: "Engel 100t", tonnellaggio: 100, stato: "Attiva" },
-                { id: "P04", modello: "BMB 150t", tonnellaggio: 150, stato: "Attiva" },
-                { id: "P05", modello: "Negri Bossi 150t", tonnellaggio: 150, stato: "Attiva" },
-                { id: "P06", modello: "Engel 180t", tonnellaggio: 180, stato: "Attiva" },
-                { id: "P07", modello: "Arburg 200t", tonnellaggio: 200, stato: "Attiva" },
-                { id: "P08", modello: "BMB 250t", tonnellaggio: 250, stato: "Attiva" },
-                { id: "P09", modello: "Krauss Maffei 300t", tonnellaggio: 300, stato: "Attiva" },
-                { id: "P10", modello: "Negri Bossi 350t", tonnellaggio: 350, stato: "Attiva" },
-                { id: "P11", modello: "Engel 400t", tonnellaggio: 400, stato: "Attiva" }
+                { id: "SD-01", modello: "Sumitomo 130T", tonnellaggio: 130, stato: "Attiva" },
+                { id: "AR-02", modello: "Arburg 130T", tonnellaggio: 130, stato: "Attiva" }
             ];
 
             ordini = ORDINI_SORGENTE.length > 0 ? ORDINI_SORGENTE.map(o => ({
