@@ -22,5 +22,5 @@ jobs:
           git config user.name 'Automazione Bot'
           git config user.email 'bot@macchiplast.com'
           git add docs/index.html
-          git commit -m "Aggiornamento automatico planning" || echo "Nessuna modifica"
+          git commit -m "Aggiornamento automatico planning" || exit 0
           git push
