@@ -5,54 +5,43 @@ import os
 def leggi_csv(nome_file):
     percorso = os.path.join('data', nome_file)
     if not os.path.exists(percorso):
-        print(f"Attenzione: {percorso} non trovato.")
+        print(f"Errore: {percorso} non trovato.")
         return []
+    
+    # Legge il file CSV gestendo l'eventuale BOM iniziale (utf-8-sig)
     with open(percorso, mode='r', encoding='utf-8-sig') as f:
-        return list(csv.DictReader(f))
+        # Usa il DictReader per mappare le colonne come chiavi dell'oggetto
+        lettore = csv.DictReader(f)
+        dati = []
+        for riga in lettore:
+            # Pulisce eventuali spazi bianchi intorno alle chiavi e ai valori
+            riga_pulita = {k.strip(): v.strip() for k, v in riga.items() if k is not None}
+            dati.append(riga_pulita)
+        return dati
 
-def genera_planning():
-    # Caricamento dei dati dai file CSV
+def genera_file_dati():
+    # Legge i file CSV originali
     articoli = leggi_csv('articoli.csv')
     presse = leggi_csv('presse.csv')
     ordini = leggi_csv('ordini.csv')
 
-    # Verifica la presenza del file HTML
-    html_path = os.path.join('docs', 'index.html')
-    if not os.path.exists(html_path):
-        print("Errore: docs/index.html non trovato.")
-        return
+    # Se la cartella docs non esiste, la crea
+    if not os.path.exists('docs'):
+        os.makedirs('docs')
 
-    with open(html_path, 'r', encoding='utf-8') as f:
-        html_content = f.read()
-
-    # Prepara le stringhe JSON dei dati
-    json_articoli = json.dumps(articoli, ensure_ascii=False)
-    json_presse = json.dumps(presse, ensure_ascii=False)
-    json_ordini = json.dumps(ordini, ensure_ascii=False)
-
-    # Costruisci il blocco dati JavaScript sostitutivo
-    nuovo_blocco_dati = (
-        "// DATA_START\n"
-        f"        const ARTICOLI_SORGENTE = {json_articoli};\n"
-        f"        const PRESSE_SORGENTE = {json_presse};\n"
-        f"        const ORDINI_SORGENTE = {json_ordini};\n"
-        "        // DATA_END"
+    # Costruisce il contenuto del file JavaScript contenente solo le variabili pure
+    contenuto_js = (
+        "// FILE GENERATO AUTOMATICAMENTE - NON MODIFICARE A MANO\n"
+        f"const ARTICOLI_SORGENTE = {json.dumps(articoli, ensure_ascii=False)};\n"
+        f"const PRESSE_SORGENTE = {json.dumps(presse, ensure_ascii=False)};\n"
+        f"const ORDINI_SORGENTE = {json.dumps(ordini, ensure_ascii=False)};\n"
     )
 
-    # Cerca i marcatori di inizio e fine dati nell'HTML e sostituisci il contenuto
-    marker_start = "// DATA_START"
-    marker_end = "// DATA_END"
-
-    if marker_start in html_content and marker_end in html_content:
-        parte_iniziale = html_content.split(marker_start)[0]
-        parte_finale = html_content.split(marker_end)[1]
-        html_aggiornato = parte_iniziale + nuovo_blocco_dati + parte_finale
-        
-        with open(html_path, 'w', encoding='utf-8') as f:
-            f.write(html_aggiornato)
-        print("Planning rigenerato con successo!")
-    else:
-        print("Errore: Marcatori di iniezione dati non trovati nel file HTML.")
+    # Scrive il file js caricabile dall'HTML
+    with open('docs/pianificazione.js', 'w', encoding='utf-8') as f:
+        f.write(contenuto_js)
+    
+    print("Sincronizzazione completata! Generato docs/pianificazione.js")
 
 if __name__ == "__main__":
-    genera_planning()
+    genera_file_dati()
