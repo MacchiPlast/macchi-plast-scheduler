@@ -1,0 +1,37 @@
+name: Rigenera Planning Settimanale
+
+on:
+push:
+paths:
+- 'data/*.csv'
+- 'scheduler.py'
+schedule:
+- cron: '0 * * * *' # Ricalcola in automatico ogni ora
+workflow_dispatch: # Permette di forzare l'aggiornamento a mano dal sito GitHub
+
+permissions:
+contents: write
+
+jobs:
+build-and-deploy:
+runs-on: ubuntu-latest
+steps:
+- name: Checkout repository
+uses: actions/checkout@v3
+
+  - name: Set up Python
+    uses: actions/setup-python@v4
+    with:
+      python-version: '3.10'
+
+  - name: Esegui Scheduler Python
+    run: python scheduler.py
+
+  - name: Commit e Push del planning aggiornato
+    run: |
+      git config --global user.name 'Macchi Plast Bot'
+      git config --global user.email 'bot@macchiplast.com'
+      git add docs/index.html
+      # Esegui commit solo se ci sono modifiche reali
+      git diff-index --quiet HEAD || git commit -m "Rigenerazione planning automatica"
+      git push
