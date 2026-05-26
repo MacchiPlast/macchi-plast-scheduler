@@ -5,14 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Planning Produzione - Macchi Plast</title>
     <style>
-        body { background-color: #121212; color: #e0e0e0; font-family: 'Segoe UI', sans-serif; padding: 20px; }
+        body { background-color: #121212; color: #e0e0e0; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; }
         h1 { color: #ffffff; border-bottom: 2px solid #333; padding-bottom: 10px; }
-        .card { background: #1e1e1e; border: 1px solid #333; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
-        .task-list { list-style: none; padding: 0; }
-        .task-item { display: flex; align-items: center; padding: 8px 0; border-bottom: 1px solid #333; }
-        input[type="checkbox"] { width: 18px; height: 18px; margin-right: 12px; cursor: pointer; }
+        .card { background: #1e1e1e; border: 1px solid #333; padding: 15px; border-radius: 8px; }
         .completed { opacity: 0.5; filter: grayscale(1); }
+        .task-item { margin-top: 10px; display: block; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -20,28 +18,27 @@
     <h1>Programmazione Presse</h1>
     <div id="dashboard" class="grid">Caricamento in corso...</div>
 
-    <!-- DATA_READY -->
-<script>const APP_DATA = {"articoli": [{"ID_Articolo": "ART-001", "Descrizione": "Scatola PP Nera", "Codice_Stampo": "ST-001", "Impronte": "2", "Tempo_Ciclo": "25", "Materiale": "PP", "Colore": "Nero", "Tonnellaggio_Min": "100"}, {"ID_Articolo": "1500", "Descrizione": "Pippo", "Codice_Stampo": "ST-001", "Impronte": "2", "Tempo_Ciclo": "4", "Materiale": "Caio", "Colore": "Blu", "Tonnellaggio_Min": "66"}], "presse": [{"ID_Pressa": "P01", "Modello": "Arburg 50t", "Tonnellaggio": "50", "Stato": "Attiva"}], "ordini": [{"ID_Ordine": "ORD-001", "Articolo": "ART-022", "Quantita_Richiesta": "5000", "Data_Scadenza": "2026-05-29", "Priorita": "Alta", "Pezzi_Prodotti": "0"}]};</script>
-
+    <!-- Carica i dati generati dal bot -->
+    <script src="dati.js"></script>
 
     <script>
         function caricaDashboard() {
             const container = document.getElementById('dashboard');
             
+            // Verifica che i dati siano stati caricati dal file dati.js
             if (typeof APP_DATA === 'undefined') {
-                container.innerHTML = "<p>Errore: Dati non caricati. Verifica scheduler.py</p>";
+                container.innerHTML = "<p>Errore: Impossibile caricare i dati. Verifica il file dati.js</p>";
                 return;
             }
 
             container.innerHTML = ""; 
 
-            // Generazione dinamica delle card per ogni ordine
+            // Ciclo sugli ordini
             APP_DATA.ordini.forEach(ordine => {
                 const card = document.createElement('div');
                 card.className = 'card';
-                card.id = `card-${ordine.id}`;
+                card.id = 'card-' + ordine.id;
                 
-                // Recupero stato salvato
                 const isChecked = localStorage.getItem('status_' + ordine.id) === 'true';
                 if (isChecked) card.classList.add('completed');
 
@@ -49,13 +46,11 @@
                     <h3>Ordine: ${ordine.id}</h3>
                     <p>Articolo: ${ordine.articolo}</p>
                     <p>Quantità: ${ordine.qta}</p>
-                    <ul class="task-list">
-                        <li class="task-item">
-                            <input type="checkbox" ${isChecked ? 'checked' : ''} 
-                                   onchange="toggleStato('${ordine.id}', this.checked)">
-                            Conferma chiusura turno
-                        </li>
-                    </ul>
+                    <label class="task-item">
+                        <input type="checkbox" ${isChecked ? 'checked' : ''} 
+                               onchange="toggleStato('${ordine.id}', this.checked)">
+                        Conferma chiusura turno
+                    </label>
                 `;
                 container.appendChild(card);
             });
@@ -64,10 +59,10 @@
         function toggleStato(id, stato) {
             localStorage.setItem('status_' + id, stato);
             const card = document.getElementById('card-' + id);
-            if (stato) card.classList.add('completed');
-            else card.classList.remove('completed');
+            card.classList.toggle('completed', stato);
         }
 
+        // Attendiamo che lo script esterno sia pronto
         window.onload = caricaDashboard;
     </script>
 </body>
