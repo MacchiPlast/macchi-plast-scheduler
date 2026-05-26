@@ -2,7 +2,6 @@ import csv
 import json
 import os
 
-# Legge i file CSV dalla cartella data/
 def leggi_csv(nome_file):
     percorso = os.path.join('data', nome_file)
     if not os.path.exists(percorso):
@@ -17,17 +16,17 @@ def genera_planning():
         "ordini": leggi_csv('ordini.csv')
     }
 
-    # Apre l'HTML template
+    # Carica il template originale
     with open('docs/index.html', 'r', encoding='utf-8') as f:
         html = f.read()
 
-    # Inietta i dati come costante JavaScript
-    dati_js = f"const APP_DATA = {json.dumps(dati, ensure_ascii=False)};"
+    # Prepara il blocco dati con il segnaposto incluso per il prossimo giro
+    dati_js = f"<script>const APP_DATA = {json.dumps(dati, ensure_ascii=False)};</script>"
+    segnaposto = "<!-- DATA_READY -->"
     
-    # Sostituisce il commento segnaposto con il blocco script dei dati
-    nuovo_html = html.replace('<!-- DATA_READY -->', f'<script>{dati_js}</script>')
+    # Sostituisce il segnaposto con i dati + il segnaposto stesso
+    nuovo_html = html.split(segnaposto)[0] + segnaposto + "\n" + dati_js + "\n" + html.split(segnaposto)[1]
 
-    # Salva il file aggiornato
     with open('docs/index.html', 'w', encoding='utf-8') as f:
         f.write(nuovo_html)
 
